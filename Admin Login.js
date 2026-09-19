@@ -1,0 +1,3 @@
+const email=document.getElementById("email"), password=document.getElementById("password"), login=document.getElementById("login"), err=document.getElementById("err");
+const client=window.supabaseClient || window.supabase.createClient(window.DOT_VIDEO_SUPABASE.url,window.DOT_VIDEO_SUPABASE.publishableKey);
+login.onclick=async()=>{err.textContent="Signing in...";login.disabled=true;try{const {error}=await client.auth.signInWithPassword({email:email.value.trim(),password:password.value});if(error)err.textContent=error.message;else location.href="Admin Panel.html";}catch(e){err.textContent=e.message||"Login failed.";}finally{login.disabled=false;}};
