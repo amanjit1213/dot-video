@@ -5,67 +5,292 @@
 <meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover">
 <meta name="theme-color" content="#080a0d">
 <title>Dot Video Player</title>
+
 <link rel="stylesheet" href="Player.css">
 <script src="supabase-config.js"></script>
 </head>
+
 <body>
+
 <header id="pageHeader">
   <button id="backBtn" aria-label="Back">‹</button>
-  <div class="logo">Dot Video<span>.</span></div>
+
+  <div class="logo">
+    Dot Video<span>.</span>
+  </div>
+
   <button id="homeBtn" aria-label="Home">⌂</button>
 </header>
 
-<main>
-  <div class="player-wrap" id="playerWrap">
-    <video id="videoPlayer" playsinline webkit-playsinline preload="metadata"></video>
-    <div id="noVideo" class="no-video">Loading video...</div>
-    <button id="centerPlayBtn" class="center-play" aria-label="Play video">▶</button>
 
-    <div id="controls" class="controls" aria-label="Video controls">
-      <div class="control-row">
-        <button id="playPauseBtn" class="control-btn" aria-label="Play">▶</button>
-        <button id="back10Btn" class="control-btn skip-btn" aria-label="Back 10 seconds">↶<span>10</span></button>
-        <button id="forward10Btn" class="control-btn skip-btn" aria-label="Forward 10 seconds">↷<span>10</span></button>
-        <div class="time"><span id="currentTime">0:00</span> / <span id="duration">0:00</span></div>
-        <div class="spacer"></div>
-        <button id="muteBtn" class="control-btn" aria-label="Mute">🔊</button>
-        <button id="fullscreenBtn" class="control-btn" aria-label="Full screen">⛶</button>
-        <button id="playerDownloadBtn" class="control-btn download-icon" aria-label="Download video">⇩</button>
-        <button id="moreBtn" class="control-btn" aria-label="More options">⋮</button>
-      </div>
-      <input id="progress" class="progress" type="range" min="0" max="100" value="0" step="0.1" aria-label="Video progress">
+<main>
+
+  <!-- VIDEO PLAYER -->
+  <div class="player-wrap" id="playerWrap">
+
+    <video
+      id="videoPlayer"
+      playsinline
+      webkit-playsinline
+      preload="metadata">
+    </video>
+
+    <div id="noVideo" class="no-video">
+      Loading video...
     </div>
 
+    <button
+      id="centerPlayBtn"
+      class="center-play"
+      aria-label="Play video">
+      ▶
+    </button>
+
+
+    <!-- VIDEO CONTROLS -->
+    <div
+      id="controls"
+      class="controls"
+      aria-label="Video controls">
+
+      <div class="control-row">
+
+        <button
+          id="playPauseBtn"
+          class="control-btn"
+          aria-label="Play">
+          ▶
+        </button>
+
+        <button
+          id="back10Btn"
+          class="control-btn skip-btn"
+          aria-label="Back 10 seconds">
+          ↶<span>10</span>
+        </button>
+
+        <button
+          id="forward10Btn"
+          class="control-btn skip-btn"
+          aria-label="Forward 10 seconds">
+          ↷<span>10</span>
+        </button>
+
+        <div class="time">
+          <span id="currentTime">0:00</span>
+          /
+          <span id="duration">0:00</span>
+        </div>
+
+        <div class="spacer"></div>
+
+        <button
+          id="muteBtn"
+          class="control-btn"
+          aria-label="Mute">
+          🔊
+        </button>
+
+        <button
+          id="fullscreenBtn"
+          class="control-btn"
+          aria-label="Full screen">
+          ⛶
+        </button>
+
+        <button
+          id="playerDownloadBtn"
+          class="control-btn download-icon"
+          aria-label="Download video">
+          ⇩
+        </button>
+
+        <button
+          id="moreBtn"
+          class="control-btn"
+          aria-label="More options">
+          ⋮
+        </button>
+
+      </div>
+
+      <input
+        id="progress"
+        class="progress"
+        type="range"
+        min="0"
+        max="100"
+        value="0"
+        step="0.1"
+        aria-label="Video progress">
+
+    </div>
+
+
+    <!-- MORE MENU -->
     <div id="moreMenu" class="more-menu" hidden>
-      <div class="menu-title">Playback speed</div>
+
+      <div class="menu-title">
+        Playback speed
+      </div>
+
       <button data-speed="0.5">0.5×</button>
       <button data-speed="1">1×</button>
       <button data-speed="1.25">1.25×</button>
       <button data-speed="1.5">1.5×</button>
       <button data-speed="2">2×</button>
+
     </div>
+
   </div>
 
+
+  <!-- VIDEO DETAILS -->
   <section class="details">
-    <h1 id="title">Dot Video</h1>
+
+    <h1 id="title">
+      Dot Video
+    </h1>
+
     <p id="description"></p>
+
+
+    <!-- VIEWS -->
+    <div
+      class="video-meta"
+      aria-label="Video views">
+
+      <span
+        class="views-meta-icon"
+        aria-hidden="true">
+        👁️
+      </span>
+
+      <span id="viewCount">
+        0
+      </span>
+
+      <span>
+        views
+      </span>
+
+    </div>
+
   </section>
 
-  <div class="action-row" aria-label="Video actions">
-    <button id="likeBtn" class="action-btn" type="button">♡ <span>Like</span></button>
-    <button id="dislikeBtn" class="action-btn" type="button">♧ <span>Dislike</span></button>
-    <button id="shareBtn" class="action-btn" type="button">↗ <span>Share</span></button>
-    <button id="downloadBtn" class="action-btn download-action" type="button">⇩ <span>Download</span></button>
+
+  <!-- ACTIONS -->
+  <div
+    class="action-row"
+    aria-label="Video actions">
+
+
+    <!-- HEART LIKE -->
+    <button
+      id="likeBtn"
+      class="action-btn heart-action"
+      type="button"
+      aria-label="Like video">
+
+      <span
+        class="heart-icon"
+        aria-hidden="true">
+        ❤️
+      </span>
+
+      <span id="likeCount">
+        0
+      </span>
+
+    </button>
+
+
+    <!-- SHARE -->
+    <button
+      id="shareBtn"
+      class="action-btn share-action"
+      type="button"
+      aria-label="Share video">
+
+      <span
+        class="share-icon"
+        aria-hidden="true">
+        📤
+      </span>
+
+      <span>
+        Share
+      </span>
+
+    </button>
+
+
+    <!-- DOWNLOAD -->
+    <button
+      id="downloadBtn"
+      class="action-btn download-action"
+      type="button">
+
+      <span
+        class="download-icon-large"
+        aria-hidden="true">
+        ⇩
+      </span>
+
+      <span>
+        Download
+      </span>
+
+    </button>
+
   </div>
 
-  <div id="downloadProgress" class="download-progress" hidden aria-live="polite">
-  <div class="download-progress-top"><span id="downloadProgressText">Downloading 0%</span><span id="downloadProgressSize"></span></div>
-  <div class="download-progress-track"><div id="downloadProgressBar" class="download-progress-bar"></div></div>
-</div>
-<div id="actionMessage" class="action-message" aria-live="polite"></div>
-  <div class="ad">ADVERTISEMENT</div>
+
+  <!-- DOWNLOAD PROGRESS -->
+  <div
+    id="downloadProgress"
+    class="download-progress"
+    hidden
+    aria-live="polite">
+
+    <div class="download-progress-top">
+
+      <span id="downloadProgressText">
+        Downloading 0%
+      </span>
+
+      <span id="downloadProgressSize"></span>
+
+    </div>
+
+    <div class="download-progress-track">
+
+      <div
+        id="downloadProgressBar"
+        class="download-progress-bar">
+      </div>
+
+    </div>
+
+  </div>
+
+
+  <div
+    id="actionMessage"
+    class="action-message"
+    aria-live="polite">
+  </div>
+
+
+  <!-- ADVERTISEMENT -->
+  <div class="ad">
+    ADVERTISEMENT
+  </div>
+
 </main>
 
+
 <script src="Player.js"></script>
+
 </body>
 </html>
