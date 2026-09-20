@@ -1,54 +1,675 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Dot Video</title>
-<link rel="stylesheet" href="Dot Video.css">
+  <meta charset="UTF-8">
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  >
+
+  <title>Dot Video</title>
+
+  <link
+    rel="stylesheet"
+    href="Dot Video.css"
+  >
+
+  <script src="supabase-config.js"></script>
 </head>
+
 <body>
 
-<header>
-  <div class="logo">Dot Video<span>.</span></div>
-  <button id="menuBtn" aria-label="Menu">☰</button>
-</header>
+  <!-- ================= HEADER ================= -->
 
-<main>
-  <section class="hero">
-    <p>WELCOME TO DOT VIDEO</p>
-    <h1>Choose what you want to watch</h1>
-    <div class="ad">ADVERTISEMENT</div>
-  </section>
+  <header>
 
-  <section class="categories">
-    <button class="category" id="desiBtn">
-      <b>🇮🇳</b>
-      <span>
-        <strong>Desi Videos</strong>
-        <small>Punjabi, Hindi &amp; more</small>
-      </span>
-      <i>›</i>
+    <div>
+      <div class="logo">
+        Dot Video<span>.</span>
+      </div>
+
+      <div class="tagline">
+        Watch. Enjoy. Anytime.
+      </div>
+    </div>
+
+    <button
+      id="menuBtn"
+      aria-label="Menu"
+    >
+      ☰
     </button>
 
-    <button class="category" id="englishBtn">
-      <b>🎬</b>
-      <span>
-        <strong>English Movies</strong>
-        <small>English movies &amp; videos</small>
-      </span>
-      <i>›</i>
+  </header>
+
+
+  <!-- ================= MAIN ================= -->
+
+  <main>
+
+    <!-- HERO -->
+
+    <section class="hero">
+
+      <p>WELCOME TO DOT VIDEO</p>
+
+      <h1>
+        Find <span>Your Next</span> Video
+      </h1>
+
+
+      <!-- SEARCH -->
+
+      <div class="search-box">
+
+        <span class="search-icon">
+          🔍
+        </span>
+
+        <input
+          id="searchInput"
+          type="search"
+          placeholder="Search Desi Videos, English Movies..."
+          autocomplete="off"
+        >
+
+        <button id="searchBtn">
+          Search
+        </button>
+
+      </div>
+
+    </section>
+
+
+    <!-- ================= SEARCH RESULTS ================= -->
+
+    <section
+      id="searchSection"
+      class="search-section hidden"
+    >
+
+      <div class="section-title">
+
+        <div>
+          <h2>Search Results</h2>
+        </div>
+
+        <button id="clearSearch">
+          Clear
+        </button>
+
+      </div>
+
+      <div
+        id="searchResults"
+        class="poster-grid"
+      ></div>
+
+    </section>
+
+
+    <!-- ================= DESI VIDEOS ================= -->
+
+    <section class="video-section">
+
+      <div class="section-title">
+
+        <div>
+
+          <div class="section-icon">
+            🎥
+          </div>
+
+          <div>
+            <h2>Desi Videos</h2>
+
+            <p>
+              Punjabi, Hindi & more
+            </p>
+          </div>
+
+        </div>
+
+        <button
+          class="view-all"
+          onclick="location.href='Desi Videos.html'"
+        >
+          View All
+        </button>
+
+      </div>
+
+
+      <div
+        id="desiResults"
+        class="poster-grid"
+      >
+
+        <div class="loading">
+          Loading...
+        </div>
+
+      </div>
+
+    </section>
+
+
+    <!-- ================= ENGLISH MOVIES ================= -->
+
+    <section class="video-section">
+
+      <div class="section-title">
+
+        <div>
+
+          <div class="section-icon">
+            🎬
+          </div>
+
+          <div>
+            <h2>English Movies</h2>
+
+            <p>
+              English movies & videos
+            </p>
+          </div>
+
+        </div>
+
+        <button
+          class="view-all"
+          onclick="location.href='English Movies.html'"
+        >
+          View All
+        </button>
+
+      </div>
+
+
+      <div
+        id="englishResults"
+        class="poster-grid"
+      >
+
+        <div class="loading">
+          Loading...
+        </div>
+
+      </div>
+
+    </section>
+
+  </main>
+
+
+  <!-- ================= MENU ================= -->
+
+  <nav
+    id="menu"
+    class="menu hidden"
+    aria-label="Main menu"
+  >
+
+    <button
+      id="closeMenu"
+      aria-label="Close"
+    >
+      ×
     </button>
-  </section>
-</main>
 
-<nav id="menu" class="menu hidden" aria-label="Main menu">
-  <button id="closeMenu" aria-label="Close">×</button>
-  <h2>Menu</h2>
-  <button data-go="index.html">Home</button>
-  <button data-go="Desi Videos.html">Desi Videos</button>
-  <button data-go="English Movies.html">English Movies</button>
-</nav>
+    <h2>Menu</h2>
 
-<script src="Dot Video.js"></script>
+
+    <button
+      onclick="location.href='index.html'"
+    >
+      🏠 Home
+    </button>
+
+
+    <button
+      onclick="location.href='Desi Videos.html'"
+    >
+      🎥 Desi Videos
+    </button>
+
+
+    <button
+      onclick="location.href='English Movies.html'"
+    >
+      🎬 English Movies
+    </button>
+
+
+    <button
+      onclick="location.href='Admin Login.html'"
+    >
+      ⚙️ Admin
+    </button>
+
+  </nav>
+
+
+  <!-- ================= JAVASCRIPT ================= -->
+
+  <script>
+
+    const menu =
+      document.getElementById("menu");
+
+    const menuBtn =
+      document.getElementById("menuBtn");
+
+    const closeMenu =
+      document.getElementById("closeMenu");
+
+
+    menuBtn.onclick = () => {
+      menu.classList.remove("hidden");
+    };
+
+
+    closeMenu.onclick = () => {
+      menu.classList.add("hidden");
+    };
+
+
+    /* Close menu when clicking outside */
+
+    document.addEventListener("click", (event) => {
+
+      if (
+        !menu.contains(event.target) &&
+        !menuBtn.contains(event.target)
+      ) {
+        menu.classList.add("hidden");
+      }
+
+    });
+
+
+    /* ================= SUPABASE ================= */
+
+    const {
+      url,
+      publishableKey
+    } = window.DOT_VIDEO_SUPABASE;
+
+
+    let allVideos = [];
+
+
+    async function loadVideos() {
+
+      const desiResults =
+        document.getElementById("desiResults");
+
+      const englishResults =
+        document.getElementById("englishResults");
+
+
+      try {
+
+        const endpoint =
+          `${url}/rest/v1/videos` +
+          `?select=id,title,description,category,poster_url,video_url,published,created_at` +
+          `&published=eq.true` +
+          `&order=created_at.desc`;
+
+
+        const response =
+          await fetch(endpoint, {
+
+            headers: {
+              apikey: publishableKey,
+              Authorization:
+                `Bearer ${publishableKey}`,
+              Accept: "application/json"
+            }
+
+          });
+
+
+        if (!response.ok) {
+
+          throw new Error(
+            `Database request failed (${response.status})`
+          );
+
+        }
+
+
+        allVideos =
+          await response.json();
+
+
+        const desiVideos =
+          allVideos
+            .filter(video =>
+              video.category === "desi" ||
+              video.category === "Desi Videos"
+            )
+            .slice(0, 3);
+
+
+        const englishVideos =
+          allVideos
+            .filter(video =>
+              video.category === "english" ||
+              video.category === "English Movies"
+            )
+            .slice(0, 3);
+
+
+        renderVideos(
+          desiResults,
+          desiVideos
+        );
+
+
+        renderVideos(
+          englishResults,
+          englishVideos
+        );
+
+
+      } catch (error) {
+
+        console.error(error);
+
+
+        desiResults.innerHTML =
+          `<div class="empty">
+             Unable to load videos.
+           </div>`;
+
+
+        englishResults.innerHTML =
+          `<div class="empty">
+             Unable to load movies.
+           </div>`;
+
+      }
+
+    }
+
+
+    /* ================= CARD ================= */
+
+    function renderVideos(
+      container,
+      videos
+    ) {
+
+      container.innerHTML = "";
+
+
+      if (!videos.length) {
+
+        container.innerHTML =
+          `<div class="empty">
+             No videos available yet.
+           </div>`;
+
+        return;
+
+      }
+
+
+      videos.forEach(video => {
+
+        const card =
+          document.createElement("article");
+
+        card.className =
+          "poster-card";
+
+
+        const posterWrap =
+          document.createElement("div");
+
+        posterWrap.className =
+          "poster-wrap";
+
+
+        const poster =
+          document.createElement("div");
+
+        poster.className =
+          "poster";
+
+
+        const image =
+          document.createElement("img");
+
+
+        if (video.poster_url) {
+
+          image.src =
+            video.poster_url;
+
+        }
+
+
+        image.alt =
+          video.title || "Video";
+
+
+        image.loading =
+          "lazy";
+
+
+        image.onerror = () => {
+
+          image.style.display =
+            "none";
+
+        };
+
+
+        poster.appendChild(image);
+
+
+        posterWrap.appendChild(poster);
+
+
+        /* NEW badge */
+
+        const badge =
+          document.createElement("span");
+
+        badge.className =
+          "new-badge";
+
+        badge.textContent =
+          "NEW";
+
+
+        posterWrap.appendChild(badge);
+
+
+        /* INFO */
+
+        const info =
+          document.createElement("div");
+
+        info.className =
+          "poster-info";
+
+
+        const title =
+          document.createElement("h3");
+
+        title.textContent =
+          video.title || "Untitled";
+
+
+        const category =
+          document.createElement("p");
+
+        category.textContent =
+          video.category === "english" ||
+          video.category === "English Movies"
+            ? "English Movies"
+            : "Desi Videos";
+
+
+        info.appendChild(title);
+
+        info.appendChild(category);
+
+
+        card.appendChild(posterWrap);
+
+        card.appendChild(info);
+
+
+        /* OPEN PLAYER */
+
+        card.onclick = () => {
+
+          location.href =
+            "Player.html?id=" +
+            encodeURIComponent(video.id);
+
+        };
+
+
+        container.appendChild(card);
+
+      });
+
+    }
+
+
+    /* ================= SEARCH ================= */
+
+    const searchInput =
+      document.getElementById("searchInput");
+
+    const searchBtn =
+      document.getElementById("searchBtn");
+
+    const searchSection =
+      document.getElementById("searchSection");
+
+    const searchResults =
+      document.getElementById("searchResults");
+
+    const clearSearch =
+      document.getElementById("clearSearch");
+
+
+    function performSearch() {
+
+      const query =
+        searchInput.value
+          .trim()
+          .toLowerCase();
+
+
+      if (!query) {
+
+        searchSection.classList.add(
+          "hidden"
+        );
+
+        searchResults.innerHTML = "";
+
+        return;
+
+      }
+
+
+      const results =
+        allVideos.filter(video => {
+
+          const title =
+            String(
+              video.title || ""
+            ).toLowerCase();
+
+
+          const description =
+            String(
+              video.description || ""
+            ).toLowerCase();
+
+
+          const category =
+            String(
+              video.category || ""
+            ).toLowerCase();
+
+
+          return (
+            title.includes(query) ||
+            description.includes(query) ||
+            category.includes(query)
+          );
+
+        });
+
+
+      searchSection.classList.remove(
+        "hidden"
+      );
+
+
+      renderVideos(
+        searchResults,
+        results
+      );
+
+
+      searchSection.scrollIntoView({
+        behavior: "smooth",
+        block: "start"
+      });
+
+    }
+
+
+    searchBtn.onclick =
+      performSearch;
+
+
+    searchInput.addEventListener(
+      "keydown",
+      event => {
+
+        if (event.key === "Enter") {
+
+          performSearch();
+
+        }
+
+      }
+    );
+
+
+    clearSearch.onclick = () => {
+
+      searchInput.value = "";
+
+      searchSection.classList.add(
+        "hidden"
+      );
+
+      searchResults.innerHTML = "";
+
+    };
+
+
+    /* ================= START ================= */
+
+    loadVideos();
+
+  </script>
+
 </body>
+
 </html>
