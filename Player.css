@@ -1,30 +1,642 @@
-*{box-sizing:border-box}
-html,body{margin:0;padding:0;background:#080a0d;color:#fff;font-family:Arial,sans-serif;min-height:100%;}
-body{overflow-x:hidden}
-header{height:76px;background:#11151b;display:flex;align-items:center;justify-content:space-between;padding:0 18px;position:relative;z-index:20}
-header button{border:0;background:#202630;color:#fff;border-radius:13px;width:48px;height:48px;font-size:30px;line-height:1;cursor:pointer}
-.logo{font-weight:900;font-size:28px}.logo span{font-size:32px}
-main{max-width:1000px;margin:auto;padding:18px}
-.player-wrap{background:#000;border-radius:18px;overflow:hidden;position:relative;width:100%;aspect-ratio:16/9;display:grid;place-items:center;touch-action:manipulation;box-shadow:0 8px 24px rgba(0,0,0,.35)}
-.player-wrap video{width:100%;height:100%;object-fit:contain;display:block;background:#000;cursor:pointer}
-.no-video{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);color:#aaa;pointer-events:none;text-align:center;padding:12px;z-index:3;max-width:90%}
-.center-play{position:absolute;z-index:7;width:78px;height:78px;border:0;border-radius:50%;background:rgba(255,255,255,.94);color:#111;font-size:31px;display:flex;align-items:center;justify-content:center;padding-left:5px;cursor:pointer;box-shadow:0 4px 18px rgba(0,0,0,.45)}
-.center-play.hidden{display:none}
-.controls{position:absolute;left:0;right:0;bottom:0;z-index:8;padding:10px 12px 9px;background:linear-gradient(transparent,rgba(0,0,0,.94));}
-.control-row{display:flex;align-items:center;gap:4px;min-height:44px}
-.control-btn{border:0;background:transparent;color:#fff;width:42px;height:42px;border-radius:9px;font-size:22px;display:grid;place-items:center;cursor:pointer;padding:0;text-shadow:0 1px 2px #000}
-.control-btn:active{background:rgba(255,255,255,.18)}
-.control-btn:disabled{opacity:.45}
-.skip-btn{position:relative;font-size:23px;font-weight:700}.skip-btn span{position:absolute;font-size:8px;line-height:1;top:14px;left:16px}
-.download-icon{font-size:29px;font-weight:800}
-.time{font-size:14px;color:#eee;white-space:nowrap;margin-left:3px}.spacer{flex:1}
-.progress{width:100%;height:20px;display:block;accent-color:#fff;cursor:pointer;margin:0}
-.more-menu{position:absolute;right:10px;bottom:64px;z-index:15;width:165px;background:rgba(20,23,29,.98);border:1px solid rgba(255,255,255,.14);border-radius:11px;padding:6px;box-shadow:0 8px 24px rgba(0,0,0,.6)}
-.more-menu[hidden]{display:none}.more-menu .menu-title{font-size:12px;color:#aaa;padding:7px 9px}.more-menu button{display:block;width:100%;border:0;background:transparent;color:#fff;text-align:left;padding:10px 9px;border-radius:7px;font-size:14px}.more-menu button:active{background:rgba(255,255,255,.15)}
-.details{padding:18px 4px 5px}.details h1{margin:0 0 7px;font-size:32px;line-height:1.2}.details p{margin:0;color:#aaa;line-height:1.5;font-size:19px}
-.action-row{display:flex;gap:10px;margin-top:16px;overflow-x:auto;padding:2px 0 4px;scrollbar-width:none}.action-row::-webkit-scrollbar{display:none}
-.action-btn{flex:1 0 auto;min-width:100px;height:52px;border:1px solid rgba(255,255,255,.08);border-radius:26px;background:#171c24;color:#fff;font-size:17px;font-weight:700;padding:0 17px;display:flex;align-items:center;justify-content:center;gap:8px;cursor:pointer}.action-btn:active{transform:scale(.98)}.action-btn.active{background:#252c38}.download-action{background:#1877f2;border-color:#1877f2;min-width:138px}.download-action:disabled{opacity:.6}
-.download-progress{margin-top:10px;padding:10px 12px;background:#12171e;border:1px solid rgba(255,255,255,.08);border-radius:12px}.download-progress[hidden]{display:none}.download-progress-top{display:flex;justify-content:space-between;align-items:center;gap:10px;color:#ddd;font-size:14px;margin-bottom:7px}.download-progress-track{height:9px;background:#2a3039;border-radius:999px;overflow:hidden}.download-progress-bar{width:0%;height:100%;background:#fff;border-radius:999px;transition:width .12s linear}.action-message{min-height:22px;text-align:center;color:#aaa;font-size:14px;padding-top:7px}
-.ad{height:110px;background:#171b21;border-radius:16px;display:grid;place-items:center;color:#777;margin-top:12px;font-size:20px}
-body.player-fullscreen{overflow:hidden;background:#000}.player-wrap.app-fullscreen{position:fixed;inset:0;width:100vw;height:100dvh;max-width:none;aspect-ratio:auto;border-radius:0;z-index:99999;background:#000}.player-wrap.app-fullscreen video{width:100%;height:100%;object-fit:contain}.player-wrap.app-fullscreen .controls{padding-bottom:max(10px,env(safe-area-inset-bottom))}.player-wrap.app-fullscreen~*{display:none}
-@media(max-width:520px){header{height:70px;padding:0 14px}header button{width:44px;height:44px}.logo{font-size:23px}main{padding:10px}.player-wrap{border-radius:15px}.details{padding-top:16px}.details h1{font-size:29px}.details p{font-size:18px}.control-btn{width:36px;height:36px;font-size:19px}.download-icon{font-size:25px}.time{font-size:12px}.skip-btn span{left:13px}.action-btn{height:50px;font-size:16px;padding:0 14px;min-width:92px}.download-action{min-width:130px}.ad{height:110px;margin-top:10px}}
+*{
+  box-sizing:border-box;
+}
+
+html,
+body{
+  margin:0;
+  padding:0;
+  background:#080a0d;
+  color:#fff;
+  font-family:Arial,sans-serif;
+  min-height:100%;
+}
+
+body{
+  overflow-x:hidden;
+}
+
+
+/* =========================
+   HEADER
+========================= */
+
+header{
+  height:76px;
+  background:#11151b;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:0 18px;
+  position:relative;
+  z-index:20;
+}
+
+header button{
+  border:0;
+  background:#202630;
+  color:#fff;
+  border-radius:13px;
+  width:48px;
+  height:48px;
+  font-size:30px;
+  line-height:1;
+  cursor:pointer;
+}
+
+.logo{
+  font-weight:900;
+  font-size:28px;
+}
+
+.logo span{
+  font-size:32px;
+}
+
+
+/* =========================
+   MAIN
+========================= */
+
+main{
+  max-width:1000px;
+  margin:auto;
+  padding:18px;
+}
+
+
+/* =========================
+   VIDEO PLAYER
+========================= */
+
+.player-wrap{
+  background:#000;
+  border-radius:18px;
+  overflow:hidden;
+  position:relative;
+  width:100%;
+  aspect-ratio:16/9;
+  display:grid;
+  place-items:center;
+  touch-action:manipulation;
+  box-shadow:0 8px 24px rgba(0,0,0,.35);
+}
+
+.player-wrap video{
+  width:100%;
+  height:100%;
+  object-fit:contain;
+  display:block;
+  background:#000;
+  cursor:pointer;
+}
+
+.no-video{
+  position:absolute;
+  left:50%;
+  top:50%;
+  transform:translate(-50%,-50%);
+  color:#aaa;
+  pointer-events:none;
+  text-align:center;
+  padding:12px;
+  z-index:3;
+  max-width:90%;
+}
+
+
+/* =========================
+   CENTER PLAY
+========================= */
+
+.center-play{
+  position:absolute;
+  z-index:7;
+  width:78px;
+  height:78px;
+  border:0;
+  border-radius:50%;
+  background:rgba(255,255,255,.94);
+  color:#111;
+  font-size:31px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding-left:5px;
+  cursor:pointer;
+  box-shadow:0 4px 18px rgba(0,0,0,.45);
+}
+
+.center-play.hidden{
+  display:none;
+}
+
+
+/* =========================
+   VIDEO CONTROLS
+========================= */
+
+.controls{
+  position:absolute;
+  left:0;
+  right:0;
+  bottom:0;
+  z-index:8;
+  padding:10px 12px 9px;
+  background:linear-gradient(
+    transparent,
+    rgba(0,0,0,.94)
+  );
+}
+
+.control-row{
+  display:flex;
+  align-items:center;
+  gap:4px;
+  min-height:44px;
+}
+
+.control-btn{
+  border:0;
+  background:transparent;
+  color:#fff;
+  width:42px;
+  height:42px;
+  border-radius:9px;
+  font-size:22px;
+  display:grid;
+  place-items:center;
+  cursor:pointer;
+  padding:0;
+  text-shadow:0 1px 2px #000;
+}
+
+.control-btn:active{
+  background:rgba(255,255,255,.18);
+}
+
+.control-btn:disabled{
+  opacity:.45;
+}
+
+.skip-btn{
+  position:relative;
+  font-size:23px;
+  font-weight:700;
+}
+
+.skip-btn span{
+  position:absolute;
+  font-size:8px;
+  line-height:1;
+  top:14px;
+  left:16px;
+}
+
+.download-icon{
+  font-size:29px;
+  font-weight:800;
+}
+
+.time{
+  font-size:14px;
+  color:#eee;
+  white-space:nowrap;
+  margin-left:3px;
+}
+
+.spacer{
+  flex:1;
+}
+
+.progress{
+  width:100%;
+  height:20px;
+  display:block;
+  accent-color:#fff;
+  cursor:pointer;
+  margin:0;
+}
+
+
+/* =========================
+   MORE MENU
+========================= */
+
+.more-menu{
+  position:absolute;
+  right:10px;
+  bottom:64px;
+  z-index:15;
+  width:165px;
+  background:rgba(20,23,29,.98);
+  border:1px solid rgba(255,255,255,.14);
+  border-radius:11px;
+  padding:6px;
+  box-shadow:0 8px 24px rgba(0,0,0,.6);
+}
+
+.more-menu[hidden]{
+  display:none;
+}
+
+.more-menu .menu-title{
+  font-size:12px;
+  color:#aaa;
+  padding:7px 9px;
+}
+
+.more-menu button{
+  display:block;
+  width:100%;
+  border:0;
+  background:transparent;
+  color:#fff;
+  text-align:left;
+  padding:10px 9px;
+  border-radius:7px;
+  font-size:14px;
+}
+
+.more-menu button:active{
+  background:rgba(255,255,255,.15);
+}
+
+
+/* =========================
+   VIDEO DETAILS
+========================= */
+
+.details{
+  padding:18px 4px 5px;
+}
+
+.details h1{
+  margin:0 0 7px;
+  font-size:32px;
+  line-height:1.2;
+}
+
+.details p{
+  margin:0;
+  color:#aaa;
+  line-height:1.5;
+  font-size:19px;
+}
+
+
+/* =========================
+   VIDEO STATS
+   ❤️ LIKE | 👁️ VIEWS
+========================= */
+
+.video-stats{
+  display:flex;
+  align-items:center;
+  gap:18px;
+  margin:10px 2px 0;
+}
+
+.stat-item,
+.stat-btn{
+  border:0;
+  background:transparent;
+  color:#fff;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:7px;
+  padding:8px 4px;
+  font-size:16px;
+  font-weight:700;
+}
+
+.stat-btn{
+  cursor:pointer;
+}
+
+.stat-btn:active{
+  transform:scale(.96);
+}
+
+.heart{
+  font-size:27px;
+  line-height:1;
+}
+
+.eye{
+  font-size:22px;
+  line-height:1;
+}
+
+.count{
+  font-size:16px;
+  color:#fff;
+  min-width:10px;
+}
+
+
+/* =========================
+   LIKE ACTIVE
+========================= */
+
+.stat-btn.liked{
+  color:#ff3040;
+}
+
+.stat-btn.liked .heart{
+  color:#ff3040;
+}
+
+.stat-btn:disabled{
+  opacity:.8;
+  cursor:default;
+}
+
+
+/* =========================
+   ACTION ROW
+========================= */
+
+.action-row{
+  display:flex;
+  gap:10px;
+  margin-top:16px;
+  overflow-x:auto;
+  padding:2px 0 4px;
+  scrollbar-width:none;
+}
+
+.action-row::-webkit-scrollbar{
+  display:none;
+}
+
+
+/* =========================
+   ACTION BUTTONS
+========================= */
+
+.action-btn{
+  flex:1 0 auto;
+  min-width:100px;
+  height:52px;
+  border:1px solid rgba(255,255,255,.08);
+  border-radius:26px;
+  background:#171c24;
+  color:#fff;
+  font-size:17px;
+  font-weight:700;
+  padding:0 17px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:8px;
+  cursor:pointer;
+}
+
+.action-btn:active{
+  transform:scale(.98);
+}
+
+
+/* =========================
+   SHARE BUTTON
+========================= */
+
+#shareBtn{
+  background:#171c24;
+  border-color:rgba(255,255,255,.08);
+}
+
+#shareBtn:hover{
+  background:#202631;
+}
+
+
+/* =========================
+   DOWNLOAD BUTTON
+========================= */
+
+.download-action{
+  background:#1877f2;
+  border-color:#1877f2;
+  min-width:138px;
+}
+
+.download-action:disabled{
+  opacity:.6;
+}
+
+
+/* =========================
+   DOWNLOAD PROGRESS
+========================= */
+
+.download-progress{
+  margin-top:10px;
+  padding:10px 12px;
+  background:#12171e;
+  border:1px solid rgba(255,255,255,.08);
+  border-radius:12px;
+}
+
+.download-progress[hidden]{
+  display:none;
+}
+
+.download-progress-top{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:10px;
+  color:#ddd;
+  font-size:14px;
+  margin-bottom:7px;
+}
+
+.download-progress-track{
+  height:9px;
+  background:#2a3039;
+  border-radius:999px;
+  overflow:hidden;
+}
+
+.download-progress-bar{
+  width:0%;
+  height:100%;
+  background:#fff;
+  border-radius:999px;
+  transition:width .12s linear;
+}
+
+
+/* =========================
+   ACTION MESSAGE
+========================= */
+
+.action-message{
+  min-height:22px;
+  text-align:center;
+  color:#aaa;
+  font-size:14px;
+  padding-top:7px;
+}
+
+
+/* =========================
+   ADVERTISEMENT
+========================= */
+
+.ad{
+  height:110px;
+  background:#171b21;
+  border-radius:16px;
+  display:grid;
+  place-items:center;
+  color:#777;
+  margin-top:12px;
+  font-size:20px;
+}
+
+
+/* =========================
+   FULLSCREEN
+========================= */
+
+body.player-fullscreen{
+  overflow:hidden;
+  background:#000;
+}
+
+.player-wrap.app-fullscreen{
+  position:fixed;
+  inset:0;
+  width:100vw;
+  height:100dvh;
+  max-width:none;
+  aspect-ratio:auto;
+  border-radius:0;
+  z-index:99999;
+  background:#000;
+}
+
+.player-wrap.app-fullscreen video{
+  width:100%;
+  height:100%;
+  object-fit:contain;
+}
+
+.player-wrap.app-fullscreen .controls{
+  padding-bottom:max(
+    10px,
+    env(safe-area-inset-bottom)
+  );
+}
+
+.player-wrap.app-fullscreen~*{
+  display:none;
+}
+
+
+/* =========================
+   MOBILE
+========================= */
+
+@media(max-width:520px){
+
+  header{
+    height:70px;
+    padding:0 14px;
+  }
+
+  header button{
+    width:44px;
+    height:44px;
+  }
+
+  .logo{
+    font-size:23px;
+  }
+
+  main{
+    padding:10px;
+  }
+
+  .player-wrap{
+    border-radius:15px;
+  }
+
+  .details{
+    padding-top:16px;
+  }
+
+  .details h1{
+    font-size:29px;
+  }
+
+  .details p{
+    font-size:18px;
+  }
+
+  .video-stats{
+    gap:15px;
+    margin-top:8px;
+  }
+
+  .stat-item,
+  .stat-btn{
+    font-size:15px;
+    padding:7px 3px;
+  }
+
+  .heart{
+    font-size:26px;
+  }
+
+  .eye{
+    font-size:21px;
+  }
+
+  .count{
+    font-size:15px;
+  }
+
+  .control-btn{
+    width:36px;
+    height:36px;
+    font-size:19px;
+  }
+
+  .download-icon{
+    font-size:25px;
+  }
+
+  .time{
+    font-size:12px;
+  }
+
+  .skip-btn span{
+    left:13px;
+  }
+
+  .action-row{
+    gap:8px;
+    margin-top:14px;
+  }
+
+  .action-btn{
+    height:50px;
+    font-size:16px;
+    padding:0 14px;
+    min-width:92px;
+  }
+
+  .download-action{
+    min-width:130px;
+  }
+
+  .ad{
+    height:110px;
+    margin-top:10px;
+  }
+}
