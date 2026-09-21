@@ -1,642 +1,657 @@
-*{
-  box-sizing:border-box;
-}
+*{box-sizing:border-box}
 
-html,
-body{
-  margin:0;
-  padding:0;
-  background:#080a0d;
-  color:#fff;
-  font-family:Arial,sans-serif;
-  min-height:100%;
+html,body{
+margin:0;
+padding:0;
+min-height:100%;
+background:#f6f7f9;
+color:#111827;
+font-family:Arial,Helvetica,sans-serif
 }
 
 body{
-  overflow-x:hidden;
+overflow-x:hidden
 }
-
-
-/* =========================
-   HEADER
-========================= */
 
 header{
-  height:76px;
-  background:#11151b;
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  padding:0 18px;
-  position:relative;
-  z-index:20;
+height:66px;
+background:#fff;
+border-bottom:1px solid #e5e7eb;
+display:flex;
+align-items:center;
+justify-content:space-between;
+padding:0 14px;
+position:sticky;
+top:0;
+z-index:20
 }
 
 header button{
-  border:0;
-  background:#202630;
-  color:#fff;
-  border-radius:13px;
-  width:48px;
-  height:48px;
-  font-size:30px;
-  line-height:1;
-  cursor:pointer;
+border:0;
+background:#eef1f5;
+color:#111827;
+border-radius:11px;
+width:42px;
+height:42px;
+font-size:28px;
+line-height:1;
+cursor:pointer
 }
 
 .logo{
-  font-weight:900;
-  font-size:28px;
+font-size:21px;
+font-weight:900;
+letter-spacing:-.5px
 }
 
 .logo span{
-  font-size:32px;
+font-size:29px
 }
-
-
-/* =========================
-   MAIN
-========================= */
 
 main{
-  max-width:1000px;
-  margin:auto;
-  padding:18px;
+width:min(100%,1000px);
+margin:auto;
+padding:14px
 }
 
-
-/* =========================
-   VIDEO PLAYER
-========================= */
-
 .player-wrap{
-  background:#000;
-  border-radius:18px;
-  overflow:hidden;
-  position:relative;
-  width:100%;
-  aspect-ratio:16/9;
-  display:grid;
-  place-items:center;
-  touch-action:manipulation;
-  box-shadow:0 8px 24px rgba(0,0,0,.35);
+background:#000;
+border-radius:16px;
+overflow:hidden;
+position:relative;
+width:100%;
+aspect-ratio:16/9;
+display:grid;
+place-items:center;
+touch-action:manipulation
 }
 
 .player-wrap video{
-  width:100%;
-  height:100%;
-  object-fit:contain;
-  display:block;
-  background:#000;
-  cursor:pointer;
+width:100%;
+height:100%;
+object-fit:contain;
+display:block;
+background:#000;
+cursor:pointer
 }
 
 .no-video{
-  position:absolute;
-  left:50%;
-  top:50%;
-  transform:translate(-50%,-50%);
-  color:#aaa;
-  pointer-events:none;
-  text-align:center;
-  padding:12px;
-  z-index:3;
-  max-width:90%;
+position:absolute;
+left:50%;
+top:50%;
+transform:translate(-50%,-50%);
+color:#aaa;
+pointer-events:none;
+text-align:center;
+padding:12px;
+z-index:3
 }
 
-
-/* =========================
-   CENTER PLAY
-========================= */
-
 .center-play{
-  position:absolute;
-  z-index:7;
-  width:78px;
-  height:78px;
-  border:0;
-  border-radius:50%;
-  background:rgba(255,255,255,.94);
-  color:#111;
-  font-size:31px;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  padding-left:5px;
-  cursor:pointer;
-  box-shadow:0 4px 18px rgba(0,0,0,.45);
+position:absolute;
+z-index:7;
+width:76px;
+height:76px;
+border:0;
+border-radius:50%;
+background:rgba(255,255,255,.94);
+color:#111;
+font-size:30px;
+display:flex;
+align-items:center;
+justify-content:center;
+padding-left:5px;
+cursor:pointer;
+box-shadow:0 4px 18px rgba(0,0,0,.35)
 }
 
 .center-play.hidden{
-  display:none;
+display:none
 }
 
-
-/* =========================
-   VIDEO CONTROLS
-========================= */
-
 .controls{
-  position:absolute;
-  left:0;
-  right:0;
-  bottom:0;
-  z-index:8;
-  padding:10px 12px 9px;
-  background:linear-gradient(
-    transparent,
-    rgba(0,0,0,.94)
-  );
+position:absolute;
+left:0;
+right:0;
+bottom:0;
+z-index:8;
+padding:10px;
+background:linear-gradient(
+transparent,
+rgba(0,0,0,.92)
+);
+transition:opacity .25s,visibility .25s
+}
+
+.controls.auto-hidden{
+opacity:0;
+visibility:hidden;
+pointer-events:none
 }
 
 .control-row{
-  display:flex;
-  align-items:center;
-  gap:4px;
-  min-height:44px;
+display:flex;
+align-items:center;
+gap:4px;
+min-height:40px
 }
 
 .control-btn{
-  border:0;
-  background:transparent;
-  color:#fff;
-  width:42px;
-  height:42px;
-  border-radius:9px;
-  font-size:22px;
-  display:grid;
-  place-items:center;
-  cursor:pointer;
-  padding:0;
-  text-shadow:0 1px 2px #000;
+border:0;
+background:transparent;
+color:#fff;
+width:39px;
+height:39px;
+border-radius:50%;
+font-size:21px;
+display:grid;
+place-items:center;
+cursor:pointer;
+padding:0;
+text-shadow:0 1px 2px #000
 }
 
-.control-btn:active{
-  background:rgba(255,255,255,.18);
+.control-btn svg{
+width:31px;
+height:31px;
+fill:none;
+stroke:currentColor;
+stroke-width:3.2;
+stroke-linecap:round;
+stroke-linejoin:round
 }
 
-.control-btn:disabled{
-  opacity:.45;
+.skip-btn svg{
+width:38px;
+height:38px
+}
+
+.skip-btn circle{
+fill:none
 }
 
 .skip-btn{
-  position:relative;
-  font-size:23px;
-  font-weight:700;
+position:relative
 }
 
 .skip-btn span{
-  position:absolute;
-  font-size:8px;
-  line-height:1;
-  top:14px;
-  left:16px;
+position:absolute;
+font-size:7px;
+line-height:1;
+top:15px;
+left:15px;
+font-weight:700;
+color:#fff;
+text-shadow:0 1px 2px #000
 }
 
-.download-icon{
-  font-size:29px;
-  font-weight:800;
+.control-btn:active{
+background:rgba(255,255,255,.18)
+}
+
+.skip-btn,
+.rotate-btn{
+border:2px solid rgba(255,255,255,.95);
+width:38px;
+height:38px
+}
+
+.skip-btn svg,
+.rotate-btn svg{
+width:29px;
+height:29px
+}
+
+.rotate-btn svg{
+stroke-width:3;
+fill:none
+}
+
+.rotate-btn.active{
+background:rgba(255,255,255,.18)
 }
 
 .time{
-  font-size:14px;
-  color:#eee;
-  white-space:nowrap;
-  margin-left:3px;
+font-size:13px;
+color:#eee;
+white-space:nowrap;
+margin-left:3px
 }
 
 .spacer{
-  flex:1;
+flex:1
 }
 
 .progress{
-  width:100%;
-  height:20px;
-  display:block;
-  accent-color:#fff;
-  cursor:pointer;
-  margin:0;
+width:100%;
+height:20px;
+display:block;
+accent-color:#fff;
+cursor:pointer;
+margin:0
 }
 
-
-/* =========================
-   MORE MENU
-========================= */
-
 .more-menu{
-  position:absolute;
-  right:10px;
-  bottom:64px;
-  z-index:15;
-  width:165px;
-  background:rgba(20,23,29,.98);
-  border:1px solid rgba(255,255,255,.14);
-  border-radius:11px;
-  padding:6px;
-  box-shadow:0 8px 24px rgba(0,0,0,.6);
+position:absolute;
+right:9px;
+bottom:60px;
+z-index:15;
+width:165px;
+background:rgba(20,23,29,.98);
+border:1px solid rgba(255,255,255,.14);
+border-radius:11px;
+padding:6px;
+box-shadow:0 8px 24px rgba(0,0,0,.6)
 }
 
 .more-menu[hidden]{
-  display:none;
+display:none
 }
 
 .more-menu .menu-title{
-  font-size:12px;
-  color:#aaa;
-  padding:7px 9px;
+font-size:12px;
+color:#aaa;
+padding:7px 9px
 }
 
 .more-menu button{
-  display:block;
-  width:100%;
-  border:0;
-  background:transparent;
-  color:#fff;
-  text-align:left;
-  padding:10px 9px;
-  border-radius:7px;
-  font-size:14px;
+display:block;
+width:100%;
+border:0;
+background:transparent;
+color:#fff;
+text-align:left;
+padding:10px 9px;
+border-radius:7px;
+font-size:14px
 }
 
 .more-menu button:active{
-  background:rgba(255,255,255,.15);
+background:rgba(255,255,255,.15)
 }
 
-
-/* =========================
-   VIDEO DETAILS
-========================= */
-
 .details{
-  padding:18px 4px 5px;
+padding:14px 2px 6px
 }
 
 .details h1{
-  margin:0 0 7px;
-  font-size:32px;
-  line-height:1.2;
+margin:0 0 6px;
+font-size:15px;
+line-height:1.35;
+font-weight:400;
+color:#111827
 }
 
 .details p{
-  margin:0;
-  color:#aaa;
-  line-height:1.5;
-  font-size:19px;
+margin:0;
+color:#6b7280;
+line-height:1.45;
+font-size:14px
 }
-
-
-/* =========================
-   VIDEO STATS
-   ❤️ LIKE | 👁️ VIEWS
-========================= */
-
-.video-stats{
-  display:flex;
-  align-items:center;
-  gap:18px;
-  margin:10px 2px 0;
-}
-
-.stat-item,
-.stat-btn{
-  border:0;
-  background:transparent;
-  color:#fff;
-  display:inline-flex;
-  align-items:center;
-  justify-content:center;
-  gap:7px;
-  padding:8px 4px;
-  font-size:16px;
-  font-weight:700;
-}
-
-.stat-btn{
-  cursor:pointer;
-}
-
-.stat-btn:active{
-  transform:scale(.96);
-}
-
-.heart{
-  font-size:27px;
-  line-height:1;
-}
-
-.eye{
-  font-size:22px;
-  line-height:1;
-}
-
-.count{
-  font-size:16px;
-  color:#fff;
-  min-width:10px;
-}
-
-
-/* =========================
-   LIKE ACTIVE
-========================= */
-
-.stat-btn.liked{
-  color:#ff3040;
-}
-
-.stat-btn.liked .heart{
-  color:#ff3040;
-}
-
-.stat-btn:disabled{
-  opacity:.8;
-  cursor:default;
-}
-
-
-/* =========================
-   ACTION ROW
-========================= */
 
 .action-row{
-  display:flex;
-  gap:10px;
-  margin-top:16px;
-  overflow-x:auto;
-  padding:2px 0 4px;
-  scrollbar-width:none;
+display:flex;
+align-items:center;
+gap:9px;
+width:100%;
+margin-top:13px;
+min-height:48px
 }
 
-.action-row::-webkit-scrollbar{
-  display:none;
+.views{
+display:flex;
+align-items:center;
+min-width:0;
+margin-right:auto;
+font-size:14px;
+color:#4b5563;
+white-space:nowrap
 }
-
-
-/* =========================
-   ACTION BUTTONS
-========================= */
 
 .action-btn{
-  flex:1 0 auto;
-  min-width:100px;
-  height:52px;
-  border:1px solid rgba(255,255,255,.08);
-  border-radius:26px;
-  background:#171c24;
-  color:#fff;
-  font-size:17px;
-  font-weight:700;
-  padding:0 17px;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  gap:8px;
-  cursor:pointer;
+height:46px;
+min-width:46px;
+border:1px solid #e5e7eb;
+background:#fff;
+color:#111827;
+border-radius:14px;
+display:flex;
+align-items:center;
+justify-content:center;
+gap:7px;
+padding:0 13px;
+font-size:16px;
+cursor:pointer;
+box-shadow:0 4px 14px rgba(17,24,39,.06)
 }
 
 .action-btn:active{
-  transform:scale(.98);
+transform:translateY(1px)
 }
 
-
-/* =========================
-   SHARE BUTTON
-========================= */
-
-#shareBtn{
-  background:#171c24;
-  border-color:rgba(255,255,255,.08);
+.action-icon{
+width:25px;
+height:25px;
+display:grid;
+place-items:center
 }
 
-#shareBtn:hover{
-  background:#202631;
+.action-icon svg{
+width:25px;
+height:25px;
+fill:none;
+stroke:currentColor;
+stroke-width:3;
+stroke-linecap:round;
+stroke-linejoin:round
 }
 
-
-/* =========================
-   DOWNLOAD BUTTON
-========================= */
-
-.download-action{
-  background:#1877f2;
-  border-color:#1877f2;
-  min-width:138px;
+.like-btn{
+font-weight:600
 }
 
-.download-action:disabled{
-  opacity:.6;
+.like-btn.liked{
+border-color:#f3b2c1;
+background:#fff5f7
 }
 
-
-/* =========================
-   DOWNLOAD PROGRESS
-========================= */
-
-.download-progress{
-  margin-top:10px;
-  padding:10px 12px;
-  background:#12171e;
-  border:1px solid rgba(255,255,255,.08);
-  border-radius:12px;
+.icon-btn{
+width:46px;
+padding:0;
+font-size:21px
 }
 
-.download-progress[hidden]{
-  display:none;
+.icon-btn svg{
+width:25px;
+height:25px;
+fill:none;
+stroke:currentColor;
+stroke-width:3.2;
+stroke-linecap:round;
+stroke-linejoin:round
 }
 
-.download-progress-top{
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  gap:10px;
-  color:#ddd;
-  font-size:14px;
-  margin-bottom:7px;
+.icon-svg-btn svg{
+width:29px;
+height:29px
 }
 
-.download-progress-track{
-  height:9px;
-  background:#2a3039;
-  border-radius:999px;
-  overflow:hidden;
+.volume-icon{
+stroke-width:3.4!important
 }
 
-.download-progress-bar{
-  width:0%;
-  height:100%;
-  background:#fff;
-  border-radius:999px;
-  transition:width .12s linear;
+.action-btn:disabled{
+opacity:.6;
+cursor:not-allowed
 }
 
-
-/* =========================
-   ACTION MESSAGE
-========================= */
-
-.action-message{
-  min-height:22px;
-  text-align:center;
-  color:#aaa;
-  font-size:14px;
-  padding-top:7px;
+.player-message{
+min-height:18px;
+margin-top:7px;
+color:#6b7280;
+font-size:12px
 }
 
-
-/* =========================
-   ADVERTISEMENT
-========================= */
-
-.ad{
-  height:110px;
-  background:#171b21;
-  border-radius:16px;
-  display:grid;
-  place-items:center;
-  color:#777;
-  margin-top:12px;
-  font-size:20px;
+.like-message{
+min-height:18px;
+margin-top:2px;
+color:#6b7280;
+font-size:12px
 }
 
+.more-videos-section{
+margin-top:22px;
+padding-top:18px;
+border-top:1px solid #e5e7eb
+}
 
-/* =========================
-   FULLSCREEN
-========================= */
+.section-heading{
+display:flex;
+align-items:center;
+justify-content:space-between;
+margin-bottom:12px
+}
+
+.section-heading h2{
+margin:0;
+font-size:20px;
+font-weight:800
+}
+
+.section-heading p{
+margin:4px 0 0;
+color:#6b7280;
+font-size:13px
+}
+
+.new-video-grid{
+display:grid;
+grid-template-columns:repeat(3,minmax(0,1fr));
+gap:12px
+}
+
+.new-video-card{
+background:#fff;
+border:1px solid #e5e7eb;
+border-radius:15px;
+overflow:hidden;
+cursor:pointer;
+box-shadow:0 6px 18px rgba(17,24,39,.06)
+}
+
+.new-video-card .new-poster{
+width:100%;
+aspect-ratio:2/3;
+background:#eef1f5;
+display:flex;
+align-items:center;
+justify-content:center;
+overflow:hidden
+}
+
+.new-video-card .new-poster img{
+width:100%;
+height:100%;
+object-fit:contain;
+display:block
+}
+
+.new-video-card .new-info{
+padding:9px
+}
+
+.new-video-card h3{
+margin:0;
+font-size:14px;
+line-height:1.3;
+font-weight:700;
+white-space:nowrap;
+overflow:hidden;
+text-overflow:ellipsis
+}
+
+.new-video-card p{
+margin:4px 0 0;
+color:#6b7280;
+font-size:11px
+}
+
+.loading-card,
+.empty-card{
+grid-column:1/-1;
+padding:28px 10px;
+text-align:center;
+color:#6b7280;
+font-size:14px
+}
+
+/* FULLSCREEN */
+
+.player-wrap:fullscreen,
+.player-wrap:-webkit-full-screen,
+.player-wrap.is-fullscreen{
+position:fixed!important;
+inset:0!important;
+width:100vw!important;
+height:100dvh!important;
+max-width:none!important;
+aspect-ratio:auto!important;
+border-radius:0!important;
+z-index:2147483647!important;
+background:#000!important;
+display:flex!important;
+align-items:center!important;
+justify-content:center!important
+}
+
+.player-wrap:fullscreen video,
+.player-wrap:-webkit-full-screen video,
+.player-wrap.is-fullscreen video{
+width:100%!important;
+height:100%!important;
+max-width:none!important;
+max-height:none!important;
+object-fit:contain!important;
+background:#000!important
+}
 
 body.player-fullscreen{
-  overflow:hidden;
-  background:#000;
+overflow:hidden;
+background:#000
 }
 
-.player-wrap.app-fullscreen{
-  position:fixed;
-  inset:0;
-  width:100vw;
-  height:100dvh;
-  max-width:none;
-  aspect-ratio:auto;
-  border-radius:0;
-  z-index:99999;
-  background:#000;
+/* WHITE VIDEO CONTROLS */
+
+.control-btn,
+.control-btn svg{
+color:#fff;
+stroke:#fff
 }
 
-.player-wrap.app-fullscreen video{
-  width:100%;
-  height:100%;
-  object-fit:contain;
+/* BLACK PAGE ACTION ICONS */
+
+.action-btn,
+.action-btn svg,
+.action-icon svg{
+color:#111827;
+stroke:#111827
 }
 
-.player-wrap.app-fullscreen .controls{
-  padding-bottom:max(
-    10px,
-    env(safe-area-inset-bottom)
-  );
+.like-btn.liked .action-icon svg{
+fill:none;
+stroke:#111827
 }
 
-.player-wrap.app-fullscreen~*{
-  display:none;
+/* LANDSCAPE */
+
+@media (orientation:landscape){
+
+.player-wrap.is-fullscreen,
+.player-wrap:fullscreen,
+.player-wrap:-webkit-full-screen{
+width:100vw!important;
+height:100dvh!important
 }
 
+}
 
-/* =========================
-   MOBILE
-========================= */
+/* MOBILE */
 
-@media(max-width:520px){
+@media(max-width:700px){
 
-  header{
-    height:70px;
-    padding:0 14px;
-  }
+.control-row{
+gap:2px;
+min-height:36px
+}
 
-  header button{
-    width:44px;
-    height:44px;
-  }
+.control-btn{
+width:34px;
+height:34px;
+font-size:18px
+}
 
-  .logo{
-    font-size:23px;
-  }
+.control-btn svg{
+width:27px;
+height:27px
+}
 
-  main{
-    padding:10px;
-  }
+.skip-btn{
+width:34px;
+height:34px
+}
 
-  .player-wrap{
-    border-radius:15px;
-  }
+.skip-btn svg,
+.rotate-btn svg{
+width:26px;
+height:26px
+}
 
-  .details{
-    padding-top:16px;
-  }
+.skip-btn span{
+font-size:6px;
+top:13px;
+left:13px
+}
 
-  .details h1{
-    font-size:29px;
-  }
+.time{
+font-size:12px
+}
 
-  .details p{
-    font-size:18px;
-  }
+}
 
-  .video-stats{
-    gap:15px;
-    margin-top:8px;
-  }
+@media(max-width:600px){
 
-  .stat-item,
-  .stat-btn{
-    font-size:15px;
-    padding:7px 3px;
-  }
+main{
+padding:10px
+}
 
-  .heart{
-    font-size:26px;
-  }
+.action-row{
+gap:7px
+}
 
-  .eye{
-    font-size:21px;
-  }
+.action-btn{
+height:44px;
+min-width:44px;
+border-radius:13px;
+padding:0 11px
+}
 
-  .count{
-    font-size:15px;
-  }
+.icon-btn{
+width:44px
+}
 
-  .control-btn{
-    width:36px;
-    height:36px;
-    font-size:19px;
-  }
+.views{
+font-size:13px
+}
 
-  .download-icon{
-    font-size:25px;
-  }
+.new-video-grid{
+grid-template-columns:repeat(2,minmax(0,1fr))
+}
 
-  .time{
-    font-size:12px;
-  }
+.details h1{
+font-size:15px
+}
 
-  .skip-btn span{
-    left:13px;
-  }
+}
 
-  .action-row{
-    gap:8px;
-    margin-top:14px;
-  }
+@media(max-width:360px){
 
-  .action-btn{
-    height:50px;
-    font-size:16px;
-    padding:0 14px;
-    min-width:92px;
-  }
+.action-row{
+gap:5px
+}
 
-  .download-action{
-    min-width:130px;
-  }
+.action-btn{
+min-width:42px;
+width:42px;
+padding:0
+}
 
-  .ad{
-    height:110px;
-    margin-top:10px;
-  }
+.like-btn{
+width:auto;
+padding:0 9px
+}
+
+.views{
+font-size:12px
+}
+
 }
