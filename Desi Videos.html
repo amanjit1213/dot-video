@@ -7,38 +7,110 @@
   <link rel="stylesheet" href="Desi Videos.css">
   <script src="supabase-config.js"></script>
 </head>
+
 <body>
 
 <header class="topbar">
-  <a class="brand" href="Dot Video.html">Dot Video<span>.</span></a>
-  <button id="menuBtn" class="menu-btn" aria-label="Open menu">☰</button>
+
+  <a class="brand" href="index.html">
+    Dot Video<span>.</span>
+  </a>
+
+  <button
+    id="menuBtn"
+    class="menu-btn"
+    aria-label="Open menu">
+    ☰
+  </button>
+
 </header>
 
-<aside id="menuPanel" class="menu-panel" aria-hidden="true">
+
+<!-- MENU -->
+
+<aside
+  id="menuPanel"
+  class="menu-panel"
+  aria-hidden="true">
+
   <div class="menu-head">
-    <div class="menu-title">Menu</div>
-    <button id="closeMenu" class="close-btn" aria-label="Close menu">×</button>
+
+    <div class="menu-title">
+      Menu
+    </div>
+
+    <button
+      id="closeMenu"
+      class="close-btn"
+      aria-label="Close menu">
+      ×
+    </button>
+
   </div>
 
+
   <nav class="menu-links">
-    <a href="Dot Video.html">🏠 <span>Home</span></a>
-    <a class="active" href="Desi Videos.html">🎥 <span>Desi Videos</span></a>
-    <a href="English Movies.html">🎬 <span>English Movies</span></a>
+
+    <!-- HOME -->
+    <a href="index.html">
+      🏠 <span>Home</span>
+    </a>
+
+
+    <!-- DESI VIDEOS -->
+    <a
+      class="active"
+      href="Desi Videos.html">
+      🎥 <span>Desi Videos</span>
+    </a>
+
+
+    <!-- ENGLISH MOVIES -->
+    <a href="English Movies.html">
+      🎬 <span>English Movies</span>
+    </a>
+
   </nav>
+
 </aside>
 
-<div id="menuOverlay" class="menu-overlay"></div>
+
+<!-- MENU OVERLAY -->
+
+<div
+  id="menuOverlay"
+  class="menu-overlay">
+</div>
+
 
 <main class="page">
+
+
+  <!-- HERO -->
+
   <section class="hero">
-    <div class="eyebrow">WELCOME TO DOT VIDEO</div>
+
+    <div class="eyebrow">
+      WELCOME TO DOT VIDEO
+    </div>
+
 
     <h1>
-      Find <span>Your Desi Videos</span>
+      Find
+      <span>Your Desi Videos</span>
     </h1>
 
-    <form id="searchForm" class="search-box">
-      <span class="search-icon">⌕</span>
+
+    <!-- SEARCH -->
+
+    <form
+      id="searchForm"
+      class="search-box">
+
+      <span class="search-icon">
+        ⌕
+      </span>
+
 
       <input
         id="searchInput"
@@ -47,25 +119,61 @@
         autocomplete="off"
       >
 
-      <button type="submit">Search</button>
+
+      <button type="submit">
+        Search
+      </button>
+
     </form>
+
   </section>
+
+
+  <!-- DESI VIDEOS TITLE -->
 
   <section class="section-head">
-    <div class="section-icon">🎥</div>
+
+    <div class="section-icon">
+      🎥
+    </div>
+
 
     <div>
-      <h2>Desi Videos</h2>
-      <p>Punjabi, Hindi &amp; more</p>
+
+      <h2>
+        Desi Videos
+      </h2>
+
+      <p>
+        Punjabi, Hindi &amp; more
+      </p>
+
     </div>
+
   </section>
 
-  <div id="status" class="status">
+
+  <!-- STATUS -->
+
+  <div
+    id="status"
+    class="status">
+
     Loading Desi Videos...
+
   </div>
 
-  <section id="videoGrid" class="video-grid"></section>
+
+  <!-- VIDEO GRID -->
+
+  <section
+    id="videoGrid"
+    class="video-grid">
+  </section>
+
+
 </main>
+
 
 <script src="Desi Videos.js"></script>
 
