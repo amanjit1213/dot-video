@@ -1,161 +1,217 @@
-const client = window.supabaseClient || window.supabase.createClient(
-  window.DOT_VIDEO_SUPABASE.url,
-  window.DOT_VIDEO_SUPABASE.publishableKey
-);
+const client =
+  window.supabaseClient ||
+  window.supabase.createClient(
+    window.DOT_VIDEO_SUPABASE.url,
+    window.DOT_VIDEO_SUPABASE.publishableKey
+  );
 
 const $ = id => document.getElementById(id);
 
-async function guard(){
-  const {data,error} = await client.auth.getSession();
-
-  if(error || !data.session){
-    location.href = "Admin Login.html";
-    return;
-  }
-
-  load();
-}
+let allVideos = [];
 
 
 /* =========================
-   LOAD CONTENT
+   HELPERS
 ========================= */
 
-async function load(){
-
-  const {data,error} = await client
-    .from("videos")
-    .select(
-      "id,title,category,description,created_at,video_path,video_url,poster_url"
-    )
-    .order("created_at",{ascending:false});
-
-  if(error){
-    $("items").innerHTML =
-      "Database error: " + esc(error.message);
-    return;
-  }
-
-  $("items").innerHTML = data?.length
-    ? data.map(v => `
-      <div class="item">
-
-        <div class="item-info">
-
-          <b>${esc(v.title)}</b>
-          — ${esc(v.category)}
-
-          <br>
-
-          <small>
-            ${esc(v.description || "")}
-          </small>
-
-        </div>
-
-        <div style="display:flex;gap:8px;margin-top:8px;">
-
-          <button
-            class="edit-btn"
-            data-id="${esc(v.id)}"
-            data-title="${esc(v.title)}"
-            data-category="${esc(v.category)}"
-            data-description="${esc(v.description || "")}"
-            data-video-path="${esc(v.video_path || "")}"
-            data-video-url="${esc(v.video_url || "")}"
-            data-poster-url="${esc(v.poster_url || "")}"
-            style="width:auto;padding:9px 14px;background:#2563eb;"
-          >
-            Edit
-          </button>
-
-          <button
-            class="delete-btn"
-            data-id="${esc(v.id)}"
-            data-video-path="${esc(v.video_path || "")}"
-            data-video-url="${esc(v.video_url || "")}"
-            data-poster-url="${esc(v.poster_url || "")}"
-            style="width:auto;padding:9px 14px;"
-          >
-            Delete
-          </button>
-
-        </div>
-
-      </div>
-    `).join("")
-    : "No content yet.";
-
-
-  document.querySelectorAll(".delete-btn")
-    .forEach(btn => {
-      btn.onclick = () => deleteVideo(btn);
-    });
-
-
-  document.querySelectorAll(".edit-btn")
-    .forEach(btn => {
-      btn.onclick = () => openEdit(btn);
-    });
+function esc(value) {
+  return String(value ?? "").replace(/[&<>"']/g, char => ({
+    "&": "&amp;",
+    "<": "&lt;",
+    ">": "&gt;",
+    '"': "&quot;",
+    "'": "&#39;"
+  }[char]));
 }
 
 
-/* =========================
-   ESCAPE HTML
-========================= */
-
-function esc(s){
-
-  return String(s ?? "").replace(/[&<>"']/g,c => ({
-    "&":"&amp;",
-    "<":"&lt;",
-    ">":"&gt;",
-    "\"":"&quot;",
-    "'":"&#39;"
-  }[c]));
-
-}
-
-
-/* =========================
-   SAFE FILE NAME
-========================= */
-
-function safe(name){
-
+function safe(name) {
   return String(name || "")
-    .replace(/[^a-zA-Z0-9._-]/g,"_");
-
+    .replace(/[^a-zA-Z0-9._-]/g, "_");
 }
 
 
-/* =========================
-   STORAGE PATH
-========================= */
+function formatDate(value) {
+  if (!value) return "";
 
-function getStoragePath(publicUrl,bucket){
+  return new Date(value).toLocaleDateString(
+    undefined,
+    {
+      day: "2-digit",
+      month: "short",
+      year: "numeric"
+    }
+  );
+}
 
-  if(!publicUrl) return "";
 
-  try{
+function getStoragePath(url, bucket) {
 
-    const url = new URL(publicUrl);
+  try {
+
+    if (!url) return "";
+
+    const u = new URL(url);
 
     const marker =
       `/storage/v1/object/public/${bucket}/`;
 
     const index =
-      url.pathname.indexOf(marker);
+      u.pathname.indexOf(marker);
 
-    if(index === -1) return "";
+    if (index < 0) return "";
 
     return decodeURIComponent(
-      url.pathname.slice(index + marker.length)
+      u.pathname.slice(index + marker.length)
     );
 
-  }catch(e){
+  } catch (error) {
 
     return "";
+
+  }
+}
+
+
+function formatBytes(bytes) {
+
+  if (!bytes) return "";
+
+  let number = bytes;
+
+  const units = [
+    "B",
+    "KB",
+    "MB",
+    "GB"
+  ];
+
+  let index = 0;
+
+  while (
+    number >= 1024 &&
+    index < 3
+  ) {
+
+    number /= 1024;
+    index++;
+
+  }
+
+  return `${number.toFixed(index ? 1 : 0)} ${units[index]}`;
+}
+
+
+/* =========================
+   ADMIN LOGIN CHECK
+========================= */
+
+async function guard() {
+
+  const {
+    data,
+    error
+  } = await client.auth.getSession();
+
+  if (
+    error ||
+    !data.session
+  ) {
+
+    location.href =
+      "Admin Login.html";
+
+    return;
+  }
+
+  if ($("items")) {
+
+    $("items").innerHTML =
+      '<div class="loading">Loading your videos...</div>';
+
+  }
+
+  await load();
+}
+
+
+/* =========================
+   LOAD VIDEOS
+========================= */
+
+async function load() {
+
+  try {
+
+    $("items").innerHTML =
+      '<div class="loading">Loading your videos...</div>';
+
+
+    const {
+      data,
+      error
+    } = await client
+      .from("videos")
+      .select(
+        "id,title,category,description,created_at,video_path,video_url,poster_url,published"
+      )
+      .order(
+        "created_at",
+        {
+          ascending: false
+        }
+      );
+
+
+    if (error) {
+
+      console.error(
+        "ADMIN LOAD ERROR:",
+        error
+      );
+
+      $("items").innerHTML = `
+        <div class="loading error-box">
+          Database error:
+          ${esc(error.message || "Unknown error")}
+          <br>
+          <small>
+            Please refresh the page.
+          </small>
+        </div>
+      `;
+
+      return;
+    }
+
+
+    allVideos =
+      Array.isArray(data)
+        ? data
+        : [];
+
+
+    render(allVideos);
+
+
+  } catch (error) {
+
+    console.error(
+      "ADMIN LOAD EXCEPTION:",
+      error
+    );
+
+
+    $("items").innerHTML = `
+      <div class="loading error-box">
+        Could not load videos:
+        ${esc(error.message || error)}
+        <br>
+        <small>
+          Please refresh the page.
+        </small>
+      </div>
+    `;
 
   }
 
@@ -163,866 +219,301 @@ function getStoragePath(publicUrl,bucket){
 
 
 /* =========================
-   CREATE EDIT BOX
+   RENDER VIDEOS
 ========================= */
 
-function createEditBox(){
+function render(list) {
 
-  if($("editBox")) return;
+  if (!list.length) {
 
-  const box = document.createElement("div");
+    $("items").innerHTML =
+      '<div class="loading">No uploaded videos found.</div>';
 
-  box.id = "editBox";
-
-  box.style.cssText = `
-    position:fixed;
-    inset:0;
-    background:rgba(0,0,0,.55);
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    z-index:9999;
-    padding:16px;
-  `;
-
-  box.innerHTML = `
-
-    <div style="
-      background:#fff;
-      width:100%;
-      max-width:520px;
-      max-height:90vh;
-      overflow:auto;
-      border-radius:18px;
-      padding:18px;
-      box-shadow:0 20px 60px rgba(0,0,0,.25);
-    ">
-
-      <h2 style="margin-top:0;">
-        Edit Video
-      </h2>
-
-      <input
-        id="editTitle"
-        placeholder="Title"
-        style="width:100%;padding:12px;margin:6px 0;"
-      >
-
-      <select
-        id="editCategory"
-        style="width:100%;padding:12px;margin:6px 0;"
-      >
-        <option value="desi">
-          Desi Videos
-        </option>
-
-        <option value="english">
-          English Movies
-        </option>
-      </select>
-
-      <textarea
-        id="editDescription"
-        placeholder="Description"
-        style="
-          width:100%;
-          min-height:120px;
-          padding:12px;
-          margin:6px 0;
-          resize:vertical;
-        "
-      ></textarea>
+    return;
+  }
 
 
-      <div style="
-        border:1px solid #ddd;
-        border-radius:12px;
-        padding:12px;
-        margin-top:10px;
-      ">
+  $("items").innerHTML =
+    list.map(
+      (video, index) => `
 
-        <b>Replace Poster (optional)</b>
+      <div class="item">
 
-        <input
-          id="editPoster"
-          type="file"
-          accept="image/*"
-          style="width:100%;margin-top:8px;"
-        >
-
-      </div>
+        <span>
+          ${index + 1}
+        </span>
 
 
-      <div style="
-        border:1px solid #ddd;
-        border-radius:12px;
-        padding:12px;
-        margin-top:10px;
-      ">
+        <span>
 
-        <b>Replace Video (optional)</b>
+          <img
+            class="poster-thumb"
+            src="${esc(video.poster_url || "")}"
+            alt=""
+          >
 
-        <input
-          id="editVideo"
-          type="file"
-          accept="video/*"
-          style="width:100%;margin-top:8px;"
-        >
+        </span>
+
+
+        <span class="item-title">
+
+          <b>
+            ${esc(video.title)}
+          </b>
+
+          <small>
+            ${esc(video.description || "")}
+          </small>
+
+        </span>
+
+
+        <span>
+
+          <span class="pill">
+
+            ${
+              video.category === "english"
+                ? "English Movies"
+                : "Desi Videos"
+            }
+
+          </span>
+
+        </span>
+
+
+        <span>
+
+          <span class="pill green">
+
+            ${
+              video.published === false
+                ? "Draft"
+                : "Published"
+            }
+
+          </span>
+
+        </span>
+
+
+        <span>
+          ${formatDate(video.created_at)}
+        </span>
+
+
+        <span class="actions">
+
+          <button
+            class="edit-btn"
+            onclick="openEdit('${video.id}')"
+          >
+            ✎ Edit
+          </button>
+
+
+          <button
+            class="delete-btn"
+            onclick="deleteVideo('${video.id}')"
+          >
+            🗑 Delete
+          </button>
+
+        </span>
 
       </div>
 
+    `
+    ).join("");
 
-      <div
-        id="editMsg"
-        style="
-          margin-top:12px;
-          font-weight:700;
-        "
-      ></div>
+}
 
 
-      <div style="
-        display:flex;
-        gap:10px;
-        margin-top:15px;
-      ">
+/* =========================
+   SEARCH
+========================= */
 
-        <button
-          id="cancelEdit"
-          style="
-            background:#6b7280;
-            flex:1;
-          "
-        >
-          Cancel
-        </button>
+$("search").oninput = event => {
 
-        <button
-          id="saveEdit"
-          style="
-            background:#2563eb;
-            flex:1;
-          "
-        >
-          Save Changes
-        </button>
-
-      </div>
-
-    </div>
-  `;
-
-  document.body.appendChild(box);
+  const query =
+    event.target.value
+      .trim()
+      .toLowerCase();
 
 
-  $("cancelEdit").onclick = () => {
-    box.remove();
+  const filtered =
+    allVideos.filter(video => {
+
+      const text =
+        `${video.title || ""} ${
+          video.description || ""
+        }`.toLowerCase();
+
+      return text.includes(query);
+
+    });
+
+
+  render(filtered);
+
+};
+
+
+/* =========================
+   CHOOSE FILE
+   BROWSE REMAINS SAME
+========================= */
+
+function hookFile(
+  buttonId,
+  inputId,
+  nameId
+) {
+
+  $(buttonId).onclick = () => {
+
+    $(inputId).click();
+
+  };
+
+
+  $(inputId).onchange = () => {
+
+    const file =
+      $(inputId).files[0];
+
+    $(nameId).textContent =
+      file
+        ? file.name
+        : "No file chosen";
+
   };
 
 }
 
 
-/* =========================
-   OPEN EDIT
-========================= */
+/* POSTER */
 
-function openEdit(btn){
+hookFile(
+  "choosePoster",
+  "poster",
+  "posterName"
+);
 
-  createEditBox();
 
-  $("editTitle").value =
-    btn.dataset.title || "";
+/* BROWSE POSTER */
 
-  $("editCategory").value =
-    btn.dataset.category || "desi";
+hookFile(
+  "browsePoster",
+  "poster",
+  "posterName"
+);
 
-  $("editDescription").value =
-    btn.dataset.description || "";
 
-  $("editPoster").value = "";
-  $("editVideo").value = "";
+/* VIDEO */
 
-  $("editMsg").textContent = "";
+hookFile(
+  "chooseVideo",
+  "video",
+  "videoName"
+);
 
-  $("saveEdit").onclick = () =>
-    saveEdit(btn);
 
-}
+/* BROWSE VIDEO */
 
-
-/* =========================
-   SAVE EDIT
-========================= */
-
-async function saveEdit(btn){
-
-  const id =
-    btn.dataset.id;
-
-  const title =
-    $("editTitle").value.trim();
-
-  const category =
-    $("editCategory").value;
-
-  const description =
-    $("editDescription").value.trim();
-
-  const newPoster =
-    $("editPoster").files[0];
-
-  const newVideo =
-    $("editVideo").files[0];
-
-
-  if(!title){
-
-    $("editMsg").textContent =
-      "Title is required.";
-
-    return;
-
-  }
-
-
-  const saveBtn =
-    $("saveEdit");
-
-  saveBtn.disabled = true;
-
-  $("editMsg").textContent =
-    "Saving changes...";
-
-
-  try{
-
-    const {
-      data:sessionData,
-      error:sessionError
-    } = await client.auth.getSession();
-
-
-    if(
-      sessionError ||
-      !sessionData.session
-    ){
-
-      throw new Error(
-        "Admin session expired. Please login again."
-      );
-
-    }
-
-
-    const token =
-      sessionData.session.access_token;
-
-
-    let videoPath =
-      btn.dataset.videoPath || "";
-
-    let videoUrl =
-      btn.dataset.videoUrl || "";
-
-    let posterUrl =
-      btn.dataset.posterUrl || "";
-
-    let oldVideoPath =
-      videoPath;
-
-    let oldPosterPath =
-      getStoragePath(
-        posterUrl,
-        "posters"
-      );
-
-
-    const stamp =
-      Date.now();
-
-
-    /* =====================
-       NEW VIDEO
-    ===================== */
-
-    if(newVideo){
-
-      const newPath =
-        `${stamp}-${safe(newVideo.name)}`;
-
-
-      $("editMsg").textContent =
-        "Uploading new video...";
-
-
-      await uploadFileWithProgress(
-        "videos",
-        newPath,
-        newVideo,
-        token,
-        () => {}
-      );
-
-
-      videoPath =
-        newPath;
-
-
-      videoUrl =
-        client.storage
-          .from("videos")
-          .getPublicUrl(newPath)
-          .data.publicUrl;
-
-
-      /* Remove old video */
-
-      if(oldVideoPath){
-
-        const {error} =
-          await client.storage
-            .from("videos")
-            .remove([oldVideoPath]);
-
-        if(error)
-          console.warn(
-            "Old video delete:",
-            error.message
-          );
-
-      }
-
-    }
-
-
-    /* =====================
-       NEW POSTER
-    ===================== */
-
-    if(newPoster){
-
-      const newPosterPath =
-        `${stamp}-${safe(newPoster.name)}`;
-
-
-      $("editMsg").textContent =
-        "Uploading new poster...";
-
-
-      await uploadFileWithProgress(
-        "posters",
-        newPosterPath,
-        newPoster,
-        token,
-        () => {}
-      );
-
-
-      posterUrl =
-        client.storage
-          .from("posters")
-          .getPublicUrl(
-            newPosterPath
-          )
-          .data.publicUrl;
-
-
-      /* Remove old poster */
-
-      if(oldPosterPath){
-
-        const {error} =
-          await client.storage
-            .from("posters")
-            .remove([
-              oldPosterPath
-            ]);
-
-        if(error)
-          console.warn(
-            "Old poster delete:",
-            error.message
-          );
-
-      }
-
-    }
-
-
-    /* =====================
-       UPDATE DATABASE
-    ===================== */
-
-    $("editMsg").textContent =
-      "Updating information...";
-
-
-    const {error:updateError} =
-      await client
-        .from("videos")
-        .update({
-
-          title:title,
-
-          category:category,
-
-          description:description,
-
-          video_path:videoPath,
-
-          video_url:videoUrl,
-
-          poster_url:posterUrl
-
-        })
-        .eq("id",id);
-
-
-    if(updateError)
-      throw updateError;
-
-
-    $("editMsg").textContent =
-      "Updated successfully.";
-
-
-    await load();
-
-
-    setTimeout(() => {
-
-      if($("editBox"))
-        $("editBox").remove();
-
-    },1000);
-
-
-  }catch(e){
-
-    console.error(
-      "EDIT ERROR:",
-      e
-    );
-
-    $("editMsg").textContent =
-      "Edit failed: " +
-      (e.message || e);
-
-    saveBtn.disabled = false;
-
-  }
-
-}
-
-
-/* =========================
-   DELETE VIDEO
-========================= */
-
-async function deleteVideo(btn){
-
-  const id =
-    btn.dataset.id;
-
-  const title =
-    btn.parentElement
-      .parentElement
-      .querySelector("b")
-      ?.textContent ||
-    "this video";
-
-
-  if(!confirm(
-    `Delete "${title}"?\n\n` +
-    `This will remove the video from the website.`
-  )) return;
-
-
-  btn.disabled = true;
-
-  btn.textContent =
-    "Deleting...";
-
-
-  $("msg").style.display =
-    "block";
-
-  $("msg").textContent =
-    "Deleting...";
-
-
-  let deleteProgress =
-    $("deleteProgress");
-
-
-  if(!deleteProgress){
-
-    deleteProgress =
-      document.createElement("div");
-
-    deleteProgress.id =
-      "deleteProgress";
-
-    deleteProgress.style.cssText = `
-      margin-top:10px;
-      padding:10px 12px;
-      background:#f3f4f6;
-      border:1px solid #e5e7eb;
-      border-radius:12px;
-    `;
-
-    deleteProgress.innerHTML = `
-
-      <div style="
-        display:flex;
-        justify-content:space-between;
-        margin-bottom:7px;
-        font-size:14px;
-      ">
-
-        <span id="deleteProgressText">
-          Deleting 0%
-        </span>
-
-      </div>
-
-      <div style="
-        height:9px;
-        background:#d1d5db;
-        border-radius:999px;
-        overflow:hidden;
-      ">
-
-        <div
-          id="deleteProgressBar"
-          style="
-            width:0%;
-            height:100%;
-            background:#111827;
-            border-radius:999px;
-          "
-        ></div>
-
-      </div>
-    `;
-
-    $("msg")
-      .insertAdjacentElement(
-        "afterend",
-        deleteProgress
-      );
-
-  }
-
-
-  deleteProgress.hidden =
-    false;
-
-
-  try{
-
-    const videoPath =
-      btn.dataset.videoPath ||
-      getStoragePath(
-        btn.dataset.videoUrl,
-        "videos"
-      );
-
-    const posterPath =
-      getStoragePath(
-        btn.dataset.posterUrl,
-        "posters"
-      );
-
-
-    $("deleteProgressBar")
-      .style.width = "15%";
-
-    $("deleteProgressText")
-      .textContent =
-      "Deleting 15%";
-
-
-    const {error:dbError} =
-      await client
-        .from("videos")
-        .delete()
-        .eq("id",id);
-
-
-    if(dbError)
-      throw dbError;
-
-
-    $("deleteProgressBar")
-      .style.width = "50%";
-
-    $("deleteProgressText")
-      .textContent =
-      "Deleting 50%";
-
-
-    if(videoPath){
-
-      const {error} =
-        await client
-          .storage
-          .from("videos")
-          .remove([videoPath]);
-
-      if(error)
-        console.warn(
-          "Video delete:",
-          error.message
-        );
-
-    }
-
-
-    if(posterPath){
-
-      const {error} =
-        await client
-          .storage
-          .from("posters")
-          .remove([posterPath]);
-
-      if(error)
-        console.warn(
-          "Poster delete:",
-          error.message
-        );
-
-    }
-
-
-    $("deleteProgressBar")
-      .style.width = "100%";
-
-    $("deleteProgressText")
-      .textContent =
-      "Delete 100%";
-
-
-    $("msg").textContent =
-      "Deleted successfully.";
-
-
-    await load();
-
-
-    setTimeout(() => {
-
-      if($("deleteProgress"))
-        $("deleteProgress").hidden = true;
-
-      $("msg").style.display =
-        "none";
-
-      $("msg").textContent =
-        "";
-
-    },1500);
-
-
-  }catch(e){
-
-    console.error(
-      "DELETE ERROR:",
-      e
-    );
-
-    $("msg").style.display =
-      "block";
-
-    $("msg").textContent =
-      "Delete failed: " +
-      (e.message || e);
-
-    btn.disabled = false;
-
-    btn.textContent =
-      "Delete";
-
-  }
-
-}
+hookFile(
+  "browseVideo",
+  "video",
+  "videoName"
+);
 
 
 /* =========================
    POSTER PREVIEW
 ========================= */
 
-$("poster").onchange = () => {
+$("poster").addEventListener(
+  "change",
+  () => {
 
-  const f =
-    $("poster").files[0];
+    const file =
+      $("poster").files[0];
 
-  if(!f){
-
-    $("posterPreview")
-      .style.display = "none";
-
-    return;
-
-  }
+    $("posterName").textContent =
+      file
+        ? file.name
+        : "No file chosen";
 
 
-  $("posterPreview").src =
-    URL.createObjectURL(f);
+    if (!file) {
 
-  $("posterPreview")
-    .style.display = "block";
+      $("posterPreview").style.display =
+        "none";
 
-};
-
-
-/* =========================
-   VIDEO INFO
-========================= */
-
-$("video").onchange = () => {
-
-  const f =
-    $("video").files[0];
-
-  $("videoInfo").textContent =
-    f
-      ? `${f.name} (${(f.size/1024/1024).toFixed(1)} MB)`
-      : "";
-
-};
+      return;
+    }
 
 
-/* =========================
-   FORMAT BYTES
-========================= */
+    const previewURL =
+      URL.createObjectURL(file);
 
-function formatBytes(bytes){
 
-  if(
-    !Number.isFinite(bytes) ||
-    bytes <= 0
-  )
-    return "";
+    $("posterPreview").src =
+      previewURL;
 
-  const units =
-    ["B","KB","MB","GB"];
 
-  let value =
-    bytes;
-
-  let unit =
-    0;
-
-  while(
-    value >= 1024 &&
-    unit < units.length - 1
-  ){
-
-    value /= 1024;
-    unit++;
+    $("posterPreview").style.display =
+      "block";
 
   }
-
-  return `${value.toFixed(
-    value >= 100 || unit === 0
-      ? 0
-      : 1
-  )} ${units[unit]}`;
-
-}
+);
 
 
 /* =========================
    UPLOAD PROGRESS
 ========================= */
 
-function setUploadProgress(
+function progress(
   percent,
   loaded,
   total
-){
+) {
 
-  const safePercent =
-    Math.max(
-      0,
-      Math.min(
-        100,
-        Number(percent) || 0
-      )
-    );
+  $("uploadProgress").hidden =
+    false;
 
 
-  $("uploadProgress")
-    .hidden = false;
+  $("uploadProgressBar").style.width =
+    `${Math.min(100, percent)}%`;
 
 
-  $("uploadProgressBar")
-    .style.width =
-    safePercent + "%";
+  $("uploadProgressText").textContent =
+    `Uploading ${Math.round(percent)}%`;
 
 
-  $("uploadProgressText")
-    .textContent =
-    `Uploading ${Math.round(
-      safePercent
-    )}%`;
-
-
-  $("uploadProgressSize")
-    .textContent =
-    total > 0
+  $("uploadProgressSize").textContent =
+    total
       ? `${formatBytes(loaded)} / ${formatBytes(total)}`
-      : formatBytes(loaded);
-
-}
-
-
-function finishUploadProgress(){
-
-  $("uploadProgressBar")
-    .style.width = "100%";
-
-  $("uploadProgressText")
-    .textContent =
-    "Upload 100%";
-
-}
-
-
-function resetUploadProgress(){
-
-  $("uploadProgress")
-    .hidden = true;
-
-  $("uploadProgressBar")
-    .style.width = "0%";
-
-  $("uploadProgressText")
-    .textContent =
-    "Uploading 0%";
-
-  $("uploadProgressSize")
-    .textContent = "";
+      : "";
 
 }
 
 
 /* =========================
-   UPLOAD FILE
+   SUPABASE STORAGE UPLOAD
 ========================= */
 
-async function uploadFileWithProgress(
+async function uploadFile(
   bucket,
   path,
   file,
   token,
-  onProgress
-){
+  callback
+) {
 
   return new Promise(
-    (resolve,reject) => {
+    (resolve, reject) => {
 
       const xhr =
         new XMLHttpRequest();
@@ -1030,11 +521,9 @@ async function uploadFileWithProgress(
 
       xhr.open(
         "POST",
-        `${window.DOT_VIDEO_SUPABASE.url}` +
-        `/storage/v1/object/${bucket}/` +
-        `${encodeURIComponent(path)
-          .replace(/%2F/g,"/")}`,
-        true
+        `${
+          window.DOT_VIDEO_SUPABASE.url
+        }/storage/v1/object/${bucket}/${encodeURIComponent(path).replace(/%2F/g, "/")}`
       );
 
 
@@ -1064,50 +553,37 @@ async function uploadFileWithProgress(
 
 
       xhr.upload.onprogress =
-        e => {
+        event => {
 
-          if(e.lengthComputable)
-            onProgress(
-              e.loaded,
-              e.total
+          if (
+            event.lengthComputable
+          ) {
+
+            callback(
+              event.loaded,
+              event.total
             );
+
+          }
 
         };
 
 
       xhr.onload = () => {
 
-        if(
+        if (
           xhr.status >= 200 &&
           xhr.status < 300
-        ){
+        ) {
 
           resolve();
 
-        }else{
-
-          let message =
-            `Upload failed (${xhr.status})`;
-
-          try{
-
-            const data =
-              JSON.parse(
-                xhr.responseText
-              );
-
-            if(data.message)
-              message =
-                data.message;
-
-            else if(data.error)
-              message =
-                data.error;
-
-          }catch(_){}
+        } else {
 
           reject(
-            new Error(message)
+            new Error(
+              `Upload failed (${xhr.status})`
+            )
           );
 
         }
@@ -1115,20 +591,15 @@ async function uploadFileWithProgress(
       };
 
 
-      xhr.onerror = () =>
+      xhr.onerror = () => {
+
         reject(
           new Error(
             "Network error while uploading."
           )
         );
 
-
-      xhr.onabort = () =>
-        reject(
-          new Error(
-            "Upload cancelled."
-          )
-        );
+      };
 
 
       xhr.send(file);
@@ -1144,251 +615,621 @@ async function uploadFileWithProgress(
 ========================= */
 
 $("save").onclick =
-async () => {
+  async () => {
 
-  const t =
-    $("title").value.trim();
+    const title =
+      $("title").value.trim();
 
-  const pf =
-    $("poster").files[0];
+    const posterFile =
+      $("poster").files[0];
 
-  const vf =
-    $("video").files[0];
-
-
-  if(!t || !vf){
-
-    $("msg").style.display =
-      "block";
-
-    $("msg").textContent =
-      "Title and video are required.";
-
-    return;
-
-  }
+    const videoFile =
+      $("video").files[0];
 
 
-  $("save").disabled =
-    true;
+    if (
+      !title ||
+      !videoFile
+    ) {
 
-  $("msg").style.display =
-    "block";
+      $("msg").textContent =
+        "Title and video are required.";
 
-
-  resetUploadProgress();
-
-
-  setUploadProgress(
-    0,
-    0,
-    vf.size +
-    (pf ? pf.size : 0)
-  );
-
-
-  $("msg").textContent =
-    "Uploading video...";
-
-
-  try{
-
-    const {
-      data:sessionData,
-      error:sessionError
-    } =
-      await client.auth.getSession();
-
-
-    if(
-      sessionError ||
-      !sessionData.session
-    ){
-
-      throw new Error(
-        "Admin session expired. Please login again."
-      );
+      return;
 
     }
 
 
-    const token =
-      sessionData.session.access_token;
+    $("save").disabled =
+      true;
 
 
-    const stamp =
-      Date.now();
+    try {
+
+      const {
+        data: sessionData,
+        error: sessionError
+      } =
+        await client.auth.getSession();
 
 
-    const vp =
-      `${stamp}-${safe(vf.name)}`;
+      if (
+        sessionError ||
+        !sessionData.session
+      ) {
 
-
-    const totalBytes =
-      vf.size +
-      (pf ? pf.size : 0);
-
-
-    await uploadFileWithProgress(
-      "videos",
-      vp,
-      vf,
-      token,
-      (loaded,total) => {
-
-        setUploadProgress(
-          (loaded / totalBytes) * 100,
-          loaded,
-          totalBytes
+        throw new Error(
+          "Admin session expired."
         );
 
       }
-    );
 
 
-    let posterUrl = "";
-
-    let posterPath = "";
-
-
-    if(pf){
-
-      posterPath =
-        `${stamp}-${safe(pf.name)}`;
+      const token =
+        sessionData.session.access_token;
 
 
-      $("msg").textContent =
-        "Uploading poster...";
+      const timestamp =
+        Date.now();
 
 
-      await uploadFileWithProgress(
-        "posters",
-        posterPath,
-        pf,
+      const totalSize =
+        videoFile.size +
+        (posterFile
+          ? posterFile.size
+          : 0);
+
+
+      const videoPath =
+        `${timestamp}-${safe(videoFile.name)}`;
+
+
+      /* VIDEO */
+
+      await uploadFile(
+        "videos",
+        videoPath,
+        videoFile,
         token,
-        (loaded,total) => {
+        (loaded, total) => {
 
-          setUploadProgress(
-            (
-              (vf.size + loaded)
-              / totalBytes
-            ) * 100,
-
-            vf.size + loaded,
-
-            totalBytes
+          progress(
+            (loaded / totalSize) * 100,
+            loaded,
+            totalSize
           );
 
         }
       );
 
 
-      posterUrl =
-        client.storage
-          .from("posters")
+      /* POSTER */
+
+      let posterPath = "";
+      let posterURL = "";
+
+
+      if (posterFile) {
+
+        posterPath =
+          `${timestamp}-${safe(posterFile.name)}`;
+
+
+        await uploadFile(
+          "posters",
+          posterPath,
+          posterFile,
+          token,
+          (loaded, total) => {
+
+            progress(
+              (
+                videoFile.size +
+                loaded
+              ) /
+              totalSize *
+              100,
+
+              videoFile.size +
+              loaded,
+
+              totalSize
+            );
+
+          }
+        );
+
+
+        posterURL =
+          client
+            .storage
+            .from("posters")
+            .getPublicUrl(
+              posterPath
+            )
+            .data
+            .publicUrl;
+
+      }
+
+
+      const videoURL =
+        client
+          .storage
+          .from("videos")
           .getPublicUrl(
-            posterPath
+            videoPath
           )
-          .data.publicUrl;
+          .data
+          .publicUrl;
+
+
+      /* DATABASE */
+
+      const {
+        error
+      } =
+        await client
+          .from("videos")
+          .insert({
+
+            title,
+
+            category:
+              $("category").value,
+
+            description:
+              $("description")
+                .value
+                .trim(),
+
+            video_path:
+              videoPath,
+
+            video_url:
+              videoURL,
+
+            poster_url:
+              posterURL,
+
+            published:
+              $("publish").checked
+
+          });
+
+
+      if (error) {
+
+        throw error;
+
+      }
+
+
+      $("uploadProgressText").textContent =
+        "Upload 100%";
+
+
+      $("uploadProgressBar").style.width =
+        "100%";
+
+
+      $("msg").textContent =
+        "Uploaded successfully.";
+
+
+      /* CLEAR FORM */
+
+      $("title").value = "";
+
+      $("description").value = "";
+
+      $("poster").value = "";
+
+      $("video").value = "";
+
+      $("posterName").textContent =
+        "No file chosen";
+
+      $("videoName").textContent =
+        "No file chosen";
+
+      $("posterPreview").style.display =
+        "none";
+
+
+      await load();
+
+
+    } catch (error) {
+
+      console.error(
+        "UPLOAD ERROR:",
+        error
+      );
+
+
+      $("msg").textContent =
+        error.message ||
+        "Upload failed.";
+
+
+    } finally {
+
+      $("save").disabled =
+        false;
 
     }
 
-
-    const videoUrl =
-      client.storage
-        .from("videos")
-        .getPublicUrl(vp)
-        .data.publicUrl;
+  };
 
 
-    const r =
-      await client
-        .from("videos")
-        .insert({
+/* =========================
+   EDIT VIDEO
+========================= */
 
-          title:t,
+window.openEdit =
+  id => {
 
-          category:
-            $("category").value,
-
-          description:
-            $("description")
-              .value
-              .trim(),
-
-          video_path:
-            vp,
-
-          video_url:
-            videoUrl,
-
-          poster_url:
-            posterUrl,
-
-          published:true
-
-        });
+    const video =
+      allVideos.find(
+        item => item.id === id
+      );
 
 
-    if(r.error)
-      throw r.error;
+    if (!video) return;
 
 
-    finishUploadProgress();
-
-
-    $("msg").textContent =
-      "Uploaded successfully.";
-
-
-    $("uploadProgress")
-      .hidden = true;
-
-
-    $("msg").style.display =
-      "none";
-
-
-    $("title").value = "";
-
-    $("description").value = "";
-
-    $("poster").value = "";
-
-    $("video").value = "";
-
-    $("posterPreview")
-      .style.display = "none";
-
-    $("videoInfo")
-      .textContent = "";
-
-
-    load();
-
-
-  }catch(e){
-
-    $("msg").style.display =
-      "block";
-
-    console.error(
-      "UPLOAD ERROR:",
-      e
-    );
-
-    $("msg").textContent =
-      e.message ||
-      "Upload failed.";
-
-  }finally{
-
-    $("save").disabled =
+    $("editModal").hidden =
       false;
 
-  }
 
-};
+    $("editModal").dataset.id =
+      id;
+
+
+    $("editTitle").value =
+      video.title || "";
+
+
+    $("editCategory").value =
+      video.category || "desi";
+
+
+    $("editDescription").value =
+      video.description || "";
+
+
+    $("editPoster").value =
+      "";
+
+
+    $("editVideo").value =
+      "";
+
+
+    $("editMsg").textContent =
+      "";
+
+  };
+
+
+$("closeEdit").onclick =
+  () => {
+
+    $("editModal").hidden =
+      true;
+
+  };
+
+
+/* =========================
+   SAVE EDIT
+========================= */
+
+$("saveEdit").onclick =
+  async () => {
+
+    const id =
+      $("editModal").dataset.id;
+
+
+    const video =
+      allVideos.find(
+        item => item.id === id
+      );
+
+
+    if (!video) return;
+
+
+    $("saveEdit").disabled =
+      true;
+
+
+    try {
+
+      const {
+        data: sessionData,
+        error: sessionError
+      } =
+        await client.auth.getSession();
+
+
+      if (
+        sessionError ||
+        !sessionData.session
+      ) {
+
+        throw new Error(
+          "Admin session expired."
+        );
+
+      }
+
+
+      const token =
+        sessionData.session.access_token;
+
+
+      const update = {
+
+        title:
+          $("editTitle")
+            .value
+            .trim(),
+
+        category:
+          $("editCategory")
+            .value,
+
+        description:
+          $("editDescription")
+            .value
+            .trim()
+
+      };
+
+
+      const posterFile =
+        $("editPoster").files[0];
+
+
+      const videoFile =
+        $("editVideo").files[0];
+
+
+      const timestamp =
+        Date.now();
+
+
+      /* NEW POSTER */
+
+      if (posterFile) {
+
+        const posterPath =
+          `${timestamp}-${safe(posterFile.name)}`;
+
+
+        await uploadFile(
+          "posters",
+          posterPath,
+          posterFile,
+          token,
+          () => {}
+        );
+
+
+        update.poster_url =
+          client
+            .storage
+            .from("posters")
+            .getPublicUrl(
+              posterPath
+            )
+            .data
+            .publicUrl;
+
+      }
+
+
+      /* NEW VIDEO */
+
+      if (videoFile) {
+
+        const videoPath =
+          `${timestamp}-${safe(videoFile.name)}`;
+
+
+        await uploadFile(
+          "videos",
+          videoPath,
+          videoFile,
+          token,
+          () => {}
+        );
+
+
+        update.video_path =
+          videoPath;
+
+
+        update.video_url =
+          client
+            .storage
+            .from("videos")
+            .getPublicUrl(
+              videoPath
+            )
+            .data
+            .publicUrl;
+
+      }
+
+
+      const {
+        error
+      } =
+        await client
+          .from("videos")
+          .update(update)
+          .eq("id", id);
+
+
+      if (error) {
+
+        throw error;
+
+      }
+
+
+      $("editMsg").textContent =
+        "Saved successfully.";
+
+
+      await load();
+
+
+      setTimeout(
+        () => {
+
+          $("editModal").hidden =
+            true;
+
+        },
+        500
+      );
+
+
+    } catch (error) {
+
+      console.error(
+        "EDIT ERROR:",
+        error
+      );
+
+
+      $("editMsg").textContent =
+        error.message ||
+        "Update failed.";
+
+
+    } finally {
+
+      $("saveEdit").disabled =
+        false;
+
+    }
+
+  };
+
+
+/* =========================
+   DELETE VIDEO
+========================= */
+
+window.deleteVideo =
+  async id => {
+
+    const video =
+      allVideos.find(
+        item => item.id === id
+      );
+
+
+    if (!video) return;
+
+
+    const confirmed =
+      confirm(
+        `Delete "${video.title}"?\n\nThis will remove the video from the website.`
+      );
+
+
+    if (!confirmed) return;
+
+
+    try {
+
+      const {
+        error
+      } =
+        await client
+          .from("videos")
+          .delete()
+          .eq("id", id);
+
+
+      if (error) {
+
+        throw error;
+
+      }
+
+
+      const videoPath =
+        video.video_path ||
+        getStoragePath(
+          video.video_url,
+          "videos"
+        );
+
+
+      const posterPath =
+        getStoragePath(
+          video.poster_url,
+          "posters"
+        );
+
+
+      if (videoPath) {
+
+        await client
+          .storage
+          .from("videos")
+          .remove([
+            videoPath
+          ]);
+
+      }
+
+
+      if (posterPath) {
+
+        await client
+          .storage
+          .from("posters")
+          .remove([
+            posterPath
+          ]);
+
+      }
+
+
+      await load();
+
+
+      $("msg").textContent =
+        "Deleted successfully.";
+
+
+    } catch (error) {
+
+      console.error(
+        "DELETE ERROR:",
+        error
+      );
+
+
+      $("msg").textContent =
+        "Delete failed: " +
+        (
+          error.message ||
+          error
+        );
+
+    }
+
+  };
 
 
 /* =========================
@@ -1396,14 +1237,14 @@ async () => {
 ========================= */
 
 $("logout").onclick =
-async () => {
+  async () => {
 
-  await client.auth.signOut();
+    await client.auth.signOut();
 
-  location.href =
-    "Admin Login.html";
+    location.href =
+      "Admin Login.html";
 
-};
+  };
 
 
 /* =========================
