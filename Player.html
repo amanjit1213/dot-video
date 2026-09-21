@@ -3,9 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover">
-<meta name="theme-color" content="#080a0d">
+<meta name="theme-color" content="#f6f7f9">
+<meta name="screen-orientation" content="landscape">
 <title>Dot Video Player</title>
-
 <link rel="stylesheet" href="Player.css">
 <script src="supabase-config.js"></script>
 </head>
@@ -14,18 +14,12 @@
 
 <header id="pageHeader">
   <button id="backBtn" aria-label="Back">‹</button>
-
-  <div class="logo">
-    Dot Video<span>.</span>
-  </div>
-
+  <div class="logo">Dot Video<span>.</span></div>
   <button id="homeBtn" aria-label="Home">⌂</button>
 </header>
 
-
 <main>
 
-  <!-- VIDEO PLAYER -->
   <div class="player-wrap" id="playerWrap">
 
     <video
@@ -39,41 +33,44 @@
       Loading video...
     </div>
 
-    <button
-      id="centerPlayBtn"
-      class="center-play"
-      aria-label="Play video">
+    <button id="centerPlayBtn" class="center-play" aria-label="Play video">
       ▶
     </button>
 
-
-    <!-- VIDEO CONTROLS -->
-    <div
-      id="controls"
-      class="controls"
-      aria-label="Video controls">
+    <div id="controls" class="controls">
 
       <div class="control-row">
 
-        <button
-          id="playPauseBtn"
+        <button id="playPauseBtn"
           class="control-btn"
           aria-label="Play">
           ▶
         </button>
 
-        <button
-          id="back10Btn"
+        <button id="back10Btn"
           class="control-btn skip-btn"
-          aria-label="Back 10 seconds">
-          ↶<span>10</span>
+          aria-label="Back 10 seconds"
+          title="Back 10 seconds">
+
+          <svg viewBox="0 0 64 64" aria-hidden="true">
+            <circle cx="32" cy="32" r="27"></circle>
+            <path d="M39 20 25 32l14 12M31 20 17 32l14 12"></path>
+          </svg>
+
+          <span>10</span>
         </button>
 
-        <button
-          id="forward10Btn"
+        <button id="forward10Btn"
           class="control-btn skip-btn"
-          aria-label="Forward 10 seconds">
-          ↷<span>10</span>
+          aria-label="Forward 10 seconds"
+          title="Forward 10 seconds">
+
+          <svg viewBox="0 0 64 64" aria-hidden="true">
+            <circle cx="32" cy="32" r="27"></circle>
+            <path d="m25 20 14 12-14 12m8-24 14 12-14 12"></path>
+          </svg>
+
+          <span>10</span>
         </button>
 
         <div class="time">
@@ -84,29 +81,58 @@
 
         <div class="spacer"></div>
 
-        <button
-          id="muteBtn"
-          class="control-btn"
-          aria-label="Mute">
-          🔊
+        <button id="muteBtn"
+          class="control-btn icon-svg-btn"
+          aria-label="Mute"
+          title="Mute">
+
+          <svg class="volume-icon"
+            viewBox="0 0 64 64"
+            aria-hidden="true">
+
+            <path d="M9 25h12l15-13v40L21 39H9z"></path>
+            <path d="m47 25 10 10m0-10L47 35"></path>
+
+          </svg>
         </button>
 
-        <button
-          id="fullscreenBtn"
-          class="control-btn"
-          aria-label="Full screen">
-          ⛶
+        <button id="fullscreenBtn"
+          class="control-btn icon-svg-btn"
+          aria-label="Full screen"
+          title="Full screen">
+
+          <svg viewBox="0 0 64 64" aria-hidden="true">
+            <path d="M9 25V11h14M55 25V11H41M9 39v14h14M55 39v14H41"></path>
+          </svg>
+
         </button>
 
-        <button
-          id="playerDownloadBtn"
-          class="control-btn download-icon"
-          aria-label="Download video">
-          ⇩
+        <button id="rotateBtn"
+          class="control-btn rotate-btn"
+          aria-label="Rotate screen"
+          title="Rotate screen">
+
+          <svg viewBox="0 0 64 64" aria-hidden="true">
+
+            <rect
+              x="22"
+              y="18"
+              width="20"
+              height="28"
+              rx="2">
+            </rect>
+
+            <path d="M12 23c4-7 10-11 18-11"></path>
+            <path d="M52 41c-4 7-10 11-18 11"></path>
+
+            <path d="m13 14 0 9 9-2"></path>
+            <path d="m51 50v-9l-9 2"></path>
+
+          </svg>
+
         </button>
 
-        <button
-          id="moreBtn"
+        <button id="moreBtn"
           class="control-btn"
           aria-label="More options">
           ⋮
@@ -126,8 +152,6 @@
 
     </div>
 
-
-    <!-- MORE MENU -->
     <div id="moreMenu" class="more-menu" hidden>
 
       <div class="menu-title">
@@ -144,151 +168,107 @@
 
   </div>
 
-
-  <!-- VIDEO DETAILS -->
   <section class="details">
 
-    <h1 id="title">
-      Dot Video
-    </h1>
+    <h1 id="title">Dot Video</h1>
 
     <p id="description"></p>
 
+    <div class="action-row">
 
-    <!-- VIEWS -->
+      <div class="views">
+        <span id="viewsCount">0 views</span>
+      </div>
+
+      <button
+        id="likeBtn"
+        class="action-btn like-btn"
+        aria-label="Like video">
+
+        <span
+          class="action-icon heart-icon"
+          aria-hidden="true">
+
+          <svg viewBox="0 0 64 64">
+            <path d="M32 53S9 39 9 23C9 14 15 9 23 9c5 0 8 3 9 6 1-3 4-6 9-6 8 0 14 5 14 14 0 16-23 30-23 30z"></path>
+          </svg>
+
+        </span>
+
+        <span id="likesCount">0</span>
+
+      </button>
+
+      <button
+        id="shareBtn"
+        class="action-btn icon-btn"
+        aria-label="Share video"
+        title="Share">
+
+        <svg viewBox="0 0 64 64" aria-hidden="true">
+          <circle cx="14" cy="32" r="7"></circle>
+          <circle cx="49" cy="14" r="7"></circle>
+          <circle cx="49" cy="50" r="7"></circle>
+          <path d="m20 29 22-11M20 35l22 11"></path>
+        </svg>
+
+      </button>
+
+      <button
+        id="downloadBtn"
+        class="action-btn icon-btn"
+        aria-label="Download video"
+        title="Download">
+
+        <svg viewBox="0 0 64 64" aria-hidden="true">
+          <path d="M32 8v31M19 27l13 13 13-13M11 47v9h42v-9"></path>
+        </svg>
+
+      </button>
+
+    </div>
+
     <div
-      class="video-meta"
-      aria-label="Video views">
+      id="message"
+      class="player-message"
+      aria-live="polite">
+    </div>
 
-      <span
-        class="views-meta-icon"
-        aria-hidden="true">
-        👁️
-      </span>
+    <div
+      id="likeMessage"
+      class="like-message"
+      aria-live="polite">
+    </div>
 
-      <span id="viewCount">
-        0
-      </span>
+  </section>
 
-      <span>
-        views
-      </span>
+  <section class="more-videos-section">
+
+    <div class="section-heading">
+
+      <div>
+
+        <h2>New Videos</h2>
+
+        <p>
+          Recently uploaded on Dot Video
+        </p>
+
+      </div>
+
+    </div>
+
+    <div id="newVideos" class="new-video-grid">
+
+      <div class="loading-card">
+        Loading...
+      </div>
 
     </div>
 
   </section>
 
-
-  <!-- ACTIONS -->
-  <div
-    class="action-row"
-    aria-label="Video actions">
-
-
-    <!-- HEART LIKE -->
-    <button
-      id="likeBtn"
-      class="action-btn heart-action"
-      type="button"
-      aria-label="Like video">
-
-      <span
-        class="heart-icon"
-        aria-hidden="true">
-        ❤️
-      </span>
-
-      <span id="likeCount">
-        0
-      </span>
-
-    </button>
-
-
-    <!-- SHARE -->
-    <button
-      id="shareBtn"
-      class="action-btn share-action"
-      type="button"
-      aria-label="Share video">
-
-      <span
-        class="share-icon"
-        aria-hidden="true">
-        📤
-      </span>
-
-      <span>
-        Share
-      </span>
-
-    </button>
-
-
-    <!-- DOWNLOAD -->
-    <button
-      id="downloadBtn"
-      class="action-btn download-action"
-      type="button">
-
-      <span
-        class="download-icon-large"
-        aria-hidden="true">
-        ⇩
-      </span>
-
-      <span>
-        Download
-      </span>
-
-    </button>
-
-  </div>
-
-
-  <!-- DOWNLOAD PROGRESS -->
-  <div
-    id="downloadProgress"
-    class="download-progress"
-    hidden
-    aria-live="polite">
-
-    <div class="download-progress-top">
-
-      <span id="downloadProgressText">
-        Downloading 0%
-      </span>
-
-      <span id="downloadProgressSize"></span>
-
-    </div>
-
-    <div class="download-progress-track">
-
-      <div
-        id="downloadProgressBar"
-        class="download-progress-bar">
-      </div>
-
-    </div>
-
-  </div>
-
-
-  <div
-    id="actionMessage"
-    class="action-message"
-    aria-live="polite">
-  </div>
-
-
-  <!-- ADVERTISEMENT -->
-  <div class="ad">
-    ADVERTISEMENT
-  </div>
-
 </main>
-
 
 <script src="Player.js"></script>
 
