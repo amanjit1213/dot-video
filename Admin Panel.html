@@ -1,6 +1,438 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><title>Dot Video Admin Panel</title><link rel="stylesheet" href="Admin Panel.css"><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="supabase-config.js"></script></head><body><header><b>Dot Video Admin Panel</b><button id="logout">Logout</button></header><main><div class="box"><h2>Add video/movie</h2><input id="title" placeholder="Title"><select id="category"><option value="desi">Desi Videos</option><option value="english">English Movies</option></select><textarea id="description" placeholder="Description"></textarea><div class="row"><div class="upload-box"><label for="poster">Poster Image</label><span class="hint">Choose poster/thumbnail</span><input id="poster" type="file" accept="image/*"><img id="posterPreview" class="preview" alt="Poster preview"></div><div class="upload-box"><label for="video">Video File</label><span class="hint">Choose video/movie</span><input id="video" type="file" accept="video/*"><span id="videoInfo" class="hint"></span></div></div><button id="save">Upload &amp; Save</button>
-<div id="uploadProgress" class="upload-progress" hidden aria-live="polite">
-  <div class="upload-progress-top"><span id="uploadProgressText">Uploading 0%</span><span id="uploadProgressSize"></span></div>
-  <div class="upload-progress-track"><div id="uploadProgressBar" class="upload-progress-bar"></div></div>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Dot Video Admin Panel</title>
+<link rel="stylesheet" href="Admin Panel.css">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase-config.js"></script>
+</head>
+
+<body>
+
+<header>
+  <div class="brand">Dot Video<span>.</span></div>
+
+  <div class="head-title">
+    <b>Admin Panel</b>
+    <small>Upload • Manage • Grow</small>
+  </div>
+
+  <div class="head-actions">
+    <a class="home-btn" href="index.html">
+      🏠 <span>Go To Home Page</span>
+    </a>
+
+    <button id="logout" class="logout-btn">
+      ↪ Logout
+    </button>
+  </div>
+</header>
+
+<main>
+
+<section class="box add-box">
+
+  <div class="section-title">
+    <div class="plus-icon">+</div>
+
+    <div>
+      <h2>Add New Video / Movie</h2>
+      <p>Fill in the details and upload your poster and video file.</p>
+    </div>
+  </div>
+
+  <div class="add-grid">
+
+    <div class="details">
+
+      <label>
+        Title <em>*</em>
+      </label>
+
+      <input
+        id="title"
+        placeholder="Enter video or movie title"
+      >
+
+      <label>
+        Description
+      </label>
+
+      <textarea
+        id="description"
+        placeholder="Enter description (optional)"
+      ></textarea>
+
+      <label>
+        Category <em>*</em>
+      </label>
+
+      <select id="category">
+        <option value="desi">
+          Desi Videos
+        </option>
+
+        <option value="english">
+          English Movies
+        </option>
+      </select>
+
+      <label class="publish-row">
+
+        <input
+          id="publish"
+          type="checkbox"
+          checked
+        >
+
+        Publish now (visible on website)
+
+      </label>
+
+    </div>
+
+
+    <div class="files">
+
+      <!-- POSTER -->
+
+      <div class="file-line">
+
+        <div class="file-label">
+          Poster Image <em>*</em>
+        </div>
+
+        <div class="file-buttons">
+
+          <button
+            type="button"
+            class="choose-btn"
+            id="choosePoster"
+          >
+            🖼️ Choose File
+          </button>
+
+          <button
+            type="button"
+            class="browse-btn"
+            id="browsePoster"
+          >
+            📁 Browse
+          </button>
+
+        </div>
+
+        <input
+          id="poster"
+          class="hidden-file"
+          type="file"
+          accept="image/*"
+        >
+
+        <div
+          id="posterName"
+          class="file-name"
+        >
+          No file chosen
+        </div>
+
+      </div>
+
+
+      <!-- VIDEO -->
+
+      <div class="file-line">
+
+        <div class="file-label">
+          Video File <em>*</em>
+        </div>
+
+        <div class="file-buttons">
+
+          <button
+            type="button"
+            class="choose-btn"
+            id="chooseVideo"
+          >
+            🎥 Choose File
+          </button>
+
+          <button
+            type="button"
+            class="browse-btn"
+            id="browseVideo"
+          >
+            📁 Browse
+          </button>
+
+        </div>
+
+        <input
+          id="video"
+          class="hidden-file"
+          type="file"
+          accept="video/*,.mp4,.mkv,.mov,.avi"
+        >
+
+        <div
+          id="videoName"
+          class="file-name"
+        >
+          No file chosen
+        </div>
+
+      </div>
+
+
+      <!-- PREVIEW -->
+
+      <div class="preview-grid">
+
+        <div class="preview-card">
+
+          <img
+            id="posterPreview"
+            alt=""
+          >
+
+          <span>
+            Poster Preview
+          </span>
+
+        </div>
+
+
+        <div class="preview-card video-preview">
+
+          <span class="play">
+            ▶
+          </span>
+
+          <span>
+            Video Preview
+          </span>
+
+        </div>
+
+      </div>
+
+
+      <div class="supported">
+        Supported formats: MP4, MKV, MOV, AVI
+      </div>
+
+    </div>
+
+  </div>
+
+
+  <button
+    id="save"
+    class="save-btn"
+  >
+    ⇧ &nbsp; Upload &amp; Save
+  </button>
+
+
+  <!-- UPLOAD PROGRESS -->
+
+  <div
+    id="uploadProgress"
+    class="progress"
+    hidden
+  >
+
+    <div>
+
+      <span id="uploadProgressText">
+        Uploading 0%
+      </span>
+
+      <span id="uploadProgressSize"></span>
+
+    </div>
+
+    <div class="track">
+
+      <i id="uploadProgressBar"></i>
+
+    </div>
+
+  </div>
+
+
+  <p id="msg"></p>
+
+</section>
+
+
+<!-- UPLOADED VIDEOS -->
+
+<section class="box content-box">
+
+  <div class="content-head">
+
+    <div class="section-title compact">
+
+      <div class="db-icon">
+        ▤
+      </div>
+
+      <div>
+
+        <h2>
+          Your Uploaded Videos
+        </h2>
+
+        <p>
+          Manage, edit or delete your uploaded content.
+        </p>
+
+      </div>
+
+    </div>
+
+
+    <input
+      id="search"
+      class="search"
+      placeholder="⌕  Search videos..."
+    >
+
+  </div>
+
+
+  <div class="table-wrap">
+
+    <div class="table-head">
+
+      <span>#</span>
+      <span>Poster</span>
+      <span>Title</span>
+      <span>Category</span>
+      <span>Status</span>
+      <span>Date</span>
+      <span>Actions</span>
+
+    </div>
+
+
+    <div id="items">
+
+      <div class="loading">
+        Loading your videos...
+      </div>
+
+    </div>
+
+  </div>
+
+</section>
+
+</main>
+
+
+<footer>
+
+  <b>
+    Dot Video. Admin Panel
+  </b>
+
+  <span>
+    Manage your content easily and keep your website up to date.
+  </span>
+
+</footer>
+
+
+<!-- EDIT MODAL -->
+
+<div
+  id="editModal"
+  class="modal"
+  hidden
+>
+
+  <div class="modal-card">
+
+    <button
+      class="modal-close"
+      id="closeEdit"
+    >
+      ×
+    </button>
+
+
+    <h2>
+      Edit Video
+    </h2>
+
+
+    <input
+      id="editTitle"
+      placeholder="Title"
+    >
+
+
+    <select id="editCategory">
+
+      <option value="desi">
+        Desi Videos
+      </option>
+
+      <option value="english">
+        English Movies
+      </option>
+
+    </select>
+
+
+    <textarea
+      id="editDescription"
+      placeholder="Description"
+    ></textarea>
+
+
+    <label>
+      Replace poster (optional)
+    </label>
+
+    <input
+      id="editPoster"
+      type="file"
+      accept="image/*"
+    >
+
+
+    <label>
+      Replace video (optional)
+    </label>
+
+    <input
+      id="editVideo"
+      type="file"
+      accept="video/*,.mp4,.mkv,.mov,.avi"
+    >
+
+
+    <button
+      id="saveEdit"
+      class="save-btn"
+    >
+      Save Changes
+    </button>
+
+
+    <p id="editMsg"></p>
+
+  </div>
+
 </div>
-<p id="msg"></p></div><div class="box"><h2>Content</h2><div id="items">Loading...</div></div></main><script src="Admin Panel.js"></script></body></html>
+
+
+<script src="Admin Panel.js"></script>
+
+</body>
+</html>
