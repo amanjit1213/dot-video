@@ -1,77 +1,401 @@
-const list = document.getElementById("list");
+const grid = document.getElementById("videoGrid");
 const status = document.getElementById("status");
-const { url, publishableKey } = window.DOT_VIDEO_SUPABASE;
 
-async function loadDesi() {
-  try {
-    status.textContent = "Loading Desi Videos...";
-    const endpoint = `${url}/rest/v1/videos?select=id,title,category,description,poster_url,video_url,published,created_at&published=eq.true&category=in.(desi,%22Desi%20Videos%22)&order=created_at.desc`;
-    const response = await fetch(endpoint, {
-      headers: {
-        apikey: publishableKey,
-        Authorization: `Bearer ${publishableKey}`,
-        Accept: "application/json"
-      }
-    });
-    if (!response.ok) throw new Error(`Database request failed (${response.status})`);
+const searchForm = document.getElementById("searchForm");
+const searchInput = document.getElementById("searchInput");
 
-    const data = await response.json();
-    list.innerHTML = "";
+const menuBtn = document.getElementById("menuBtn");
+const closeMenu = document.getElementById("closeMenu");
 
-    if (!data.length) {
-      status.textContent = "No Desi videos found.";
-      return;
+const menuPanel = document.getElementById("menuPanel");
+const menuOverlay = document.getElementById("menuOverlay");
+
+const { url, publishableKey } =
+  window.DOT_VIDEO_SUPABASE;
+
+let allVideos = [];
+
+
+/* =========================
+   MENU
+========================= */
+
+function openMenu(){
+
+  menuPanel.classList.add("show");
+
+  menuOverlay.classList.add("show");
+
+  menuPanel.setAttribute(
+    "aria-hidden",
+    "false"
+  );
+}
+
+
+function closeMenuPanel(){
+
+  menuPanel.classList.remove("show");
+
+  menuOverlay.classList.remove("show");
+
+  menuPanel.setAttribute(
+    "aria-hidden",
+    "true"
+  );
+}
+
+
+menuBtn.addEventListener(
+  "click",
+  openMenu
+);
+
+
+closeMenu.addEventListener(
+  "click",
+  closeMenuPanel
+);
+
+
+menuOverlay.addEventListener(
+  "click",
+  closeMenuPanel
+);
+
+
+/* =========================
+   RENDER VIDEOS
+========================= */
+
+function render(videos){
+
+  grid.innerHTML = "";
+
+
+  if(!videos.length){
+
+    status.textContent =
+      searchInput.value.trim()
+        ? "No matching Desi Videos found."
+        : "No Desi Videos found.";
+
+    return;
+  }
+
+
+  status.textContent = "";
+
+
+  videos.forEach(video => {
+
+    const card =
+      document.createElement("article");
+
+    card.className = "card";
+
+
+    /* POSTER */
+
+    const posterWrap =
+      document.createElement("div");
+
+    posterWrap.className =
+      "poster-wrap";
+
+
+    if(video.poster_url){
+
+      const img =
+        document.createElement("img");
+
+      img.className = "poster";
+
+      img.src = video.poster_url;
+
+      img.alt =
+        video.title ||
+        "Desi Video";
+
+      img.loading = "lazy";
+
+
+      img.onerror = () => {
+
+        posterWrap.remove();
+
+      };
+
+
+      posterWrap.appendChild(img);
+
+    }else{
+
+      posterWrap.textContent = "🎥";
+
+      posterWrap.style.fontSize =
+        "42px";
     }
 
-    status.textContent = "";
-    data.forEach(addCard);
-  } catch (error) {
+
+    /* CARD BODY */
+
+    const body =
+      document.createElement("div");
+
+    body.className = "card-body";
+
+
+    const title =
+      document.createElement("h3");
+
+    title.className =
+      "card-title";
+
+    title.textContent =
+      video.title ||
+      "Untitled";
+
+
+    const meta =
+      document.createElement("p");
+
+    meta.className =
+      "card-meta";
+
+
+    const date =
+      video.created_at
+        ? new Date(
+            video.created_at
+          ).toLocaleDateString(
+            undefined,
+            {
+              day:"numeric",
+              month:"short",
+              year:"numeric"
+            }
+          )
+        : "";
+
+
+    meta.textContent =
+      date
+        ? `Desi Video • ${date}`
+        : "Desi Video";
+
+
+    body.append(
+      title,
+      meta
+    );
+
+
+    card.append(
+      posterWrap,
+      body
+    );
+
+
+    /* PLAYER LINK */
+
+    const q =
+      new URLSearchParams();
+
+
+    q.set(
+      "id",
+      video.id
+    );
+
+
+    if(video.video_url){
+
+      q.set(
+        "url",
+        video.video_url
+      );
+    }
+
+
+    if(video.title){
+
+      q.set(
+        "title",
+        video.title
+      );
+    }
+
+
+    if(video.description){
+
+      q.set(
+        "description",
+        video.description
+      );
+    }
+
+
+    card.addEventListener(
+      "click",
+      () => {
+
+        location.href =
+          "Player.html?" +
+          q.toString();
+
+      }
+    );
+
+
+    grid.appendChild(card);
+
+  });
+}
+
+
+/* =========================
+   LOAD DESI VIDEOS
+========================= */
+
+async function loadDesiVideos(){
+
+  try{
+
+    status.textContent =
+      "Loading Desi Videos...";
+
+
+    const endpoint =
+      `${url}/rest/v1/videos` +
+      `?select=id,title,description,poster_url,video_url,category,published,created_at` +
+      `&published=eq.true` +
+      `&category=in.(desi,%22Desi%20Videos%22)` +
+      `&order=created_at.desc`;
+
+
+    const response =
+      await fetch(
+        endpoint,
+        {
+          headers:{
+            apikey:
+              publishableKey,
+
+            Authorization:
+              `Bearer ${publishableKey}`,
+
+            Accept:
+              "application/json"
+          }
+        }
+      );
+
+
+    if(!response.ok){
+
+      throw new Error(
+        `Database request failed (${response.status})`
+      );
+    }
+
+
+    allVideos =
+      await response.json();
+
+
+    render(allVideos);
+
+  }catch(error){
+
     console.error(error);
-    status.textContent = "Database error: " + error.message;
+
+    status.textContent =
+      "Database error: " +
+      error.message;
   }
 }
 
-function addCard(video) {
-  const card = document.createElement("article");
-  card.className = "card";
 
-  if (video.poster_url) {
-    const img = document.createElement("img");
-    img.src = video.poster_url;
-    img.alt = video.title || "Video";
-    img.loading = "lazy";
-    img.onerror = () => img.remove();
-    card.appendChild(img);
+/* =========================
+   SEARCH
+========================= */
+
+function doSearch(){
+
+  const term =
+    searchInput.value
+      .trim()
+      .toLowerCase();
+
+
+  if(!term){
+
+    render(allVideos);
+
+    return;
   }
 
-  const body = document.createElement("div");
-  body.className = "card-body";
 
-  const title = document.createElement("h2");
-  title.textContent = video.title || "Untitled";
+  const matches =
+    allVideos.filter(video => {
 
-  const desc = document.createElement("p");
-  desc.textContent = video.description || "";
+      const title =
+        String(
+          video.title || ""
+        ).toLowerCase();
 
-  body.append(title, desc);
-  card.appendChild(body);
 
-  // Pass the already verified video_url directly to Player.html.
-  // The Player can still fall back to the database when this parameter is absent.
-  const query = new URLSearchParams();
-  query.set("id", video.id);
-  if (video.video_url) query.set("url", video.video_url);
-  if (video.title) query.set("title", video.title);
-  if (video.description) query.set("description", video.description);
+      const description =
+        String(
+          video.description || ""
+        ).toLowerCase();
 
-  card.onclick = () => {
-    location.href = "Player.html?" + query.toString();
-  };
 
-  list.appendChild(card);
+      return (
+        title.includes(term) ||
+        description.includes(term)
+      );
+
+    });
+
+
+  render(matches);
 }
 
-document.getElementById("backBtn").onclick = () => history.back();
-document.getElementById("homeBtn").onclick = () => location.href = "Dot Video.html";
 
-loadDesi();
+/* SEARCH BUTTON */
+
+searchForm.addEventListener(
+  "submit",
+  event => {
+
+    event.preventDefault();
+
+    doSearch();
+
+  }
+);
+
+
+/* CLEAR SEARCH */
+
+searchInput.addEventListener(
+  "input",
+  () => {
+
+    if(
+      !searchInput.value.trim()
+    ){
+
+      render(allVideos);
+
+    }
+
+  }
+);
+
+
+/* START */
+
+loadDesiVideos();
